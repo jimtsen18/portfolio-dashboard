@@ -32,10 +32,7 @@ const firebaseConfig = {
   measurementId:     "G-P6YC4DR214",
 };
 
-const fbApp  = initializeApp({
-  ...firebaseConfig,
-  authDomain: "portfolio-dashboard-five-neon.vercel.app",
-});
+const fbApp  = initializeApp(firebaseConfig);
 const db     = getFirestore(fbApp);
 const auth   = getAuth(fbApp);
 const googleProvider = new GoogleAuthProvider();
@@ -293,10 +290,12 @@ const LoginScreen = () => {
     setErr("");
     setGoogleBusy(true);
     try {
-      await signInWithRedirect(auth, googleProvider);
+      await signInWithPopup(auth, googleProvider);
     } catch (e) {
       console.error("Google Sign-In error:", e.code, e.message);
-      setErr(friendlyError(e.code));
+      if (e.code !== "auth/popup-closed-by-user" && e.code !== "auth/cancelled-popup-request") {
+        setErr(friendlyError(e.code));
+      }
       setGoogleBusy(false);
     }
   };
