@@ -1,3 +1,32 @@
+const FINNHUB_KEY = "d8t8rvpr01qhcnk0oh6gd8t8rvpr01qhcnk0oh70";
+
+// Fetch US stock price from Finnhub
+async function fetchUSPrice(symbol) {
+  const url = `https://finnhub.io/api/v1/quote?symbol=${symbol}&token=${FINNHUB_KEY}`;
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`Finnhub error ${res.status} for ${symbol}`);
+  const data = await res.json();
+  // c = current price
+  if (!data.c || data.c === 0) return null;
+  return data.c;
+}
+
+// Fetch TW stock price from TWSE API
+async function fetchTWPrice(symbol) {
+  // TWSE uses format like 2330 for stocks, 0056 for ETFs
+  const url = `https://mis.twse.com.tw/stock/api/getStockInfo.jsp?ex_ch=tse_${symbol}.tw&json=1&delay=0`;
+  const res = await fetch(url, {
+    headers: { "User-Agent": "Mozilla/5.0" }
+  });
+  if (!res.ok) throw new Error(`TWSE error ${res.status} for ${symbol}`);
+  const data = await res.json();
+  const info = data?.msgArray?.[0];
+  if (!info) return null;
+  // z = current price, y = yesterday close (fallback)
+  const price = parseFloat(info.z !== "-" ? info.z : info.y);
+  return isNaN(price) ? null : price;
+}
+
 export default async function handler(req, res) {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "GET");
@@ -5,50 +34,40 @@ export default async function handler(req, res) {
   const { symbols } = req.query;
   if (!symbols) return res.status(400).json({ error: "Missing symbols" });
 
-  const symbolList = symbols.split(",").map(s => s.trim());
-  const yahooSymbols = symbolList.map(s =>
-    /^\d/.test(s) ? `${s}.TW` : s
-  ).join(",");
+  const symbolList = symbols.split(",").map(s => s.trim()).filter(Boolean);
 
-  try {
-    // Step 1: get crumb
-    const crumbRes = await fetch("https://query2.finance.yahoo.com/v1/test/getcrumb", {
-      headers: {
-        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-        "Accept": "*/*",
-        "Accept-Language": "en-US,en;q=0.9",
-        "Referer": "https://finance.yahoo.com/",
-        "Cookie": "tbla_id=; GUC=AQABCAFn; A1=d=AQABB; A3=d=AQABB",
-      }
-    });
-    const crumb = await crumbRes.text();
+  // Detect TW vs US: TW symbols start with digits
+  const twSymbols = symbolList.filter(s => /^\d/.test(s));
+  const usSymbols = symbolList.filter(s => !/^\d/.test(s));
 
-    // Step 2: fetch quotes with crumb
-    const url = `https://query2.finance.yahoo.com/v7/finance/quote?symbols=${yahooSymbols}&crumb=${encodeURIComponent(crumb.trim())}`;
-    const quoteRes = await fetch(url, {
-      headers: {
-        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-        "Accept": "application/json",
-        "Accept-Language": "en-US,en;q=0.9",
-        "Referer": "https://finance.yahoo.com/",
-        "Cookie": "tbla_id=; GUC=AQABCAFn; A1=d=AQABB; A3=d=AQABB",
-      }
-    });
+  const prices = {};
+  const errors = [];
 
-    if (!quoteRes.ok) throw new Error(`Yahoo API error: ${quoteRes.status}`);
-    const data = await quoteRes.json();
-    const quotes = data?.quoteResponse?.result || [];
+  // Fetch TW prices (parallel)
+  await Promise.all(twSymbols.map(async sym => {
+    try {
+      const price = await fetchTWPrice(sym);
+      if (price) prices[sym] = price;
+    } catch (e) {
+      errors.push(`${sym}: ${e.message}`);
+    }
+  }));
 
-    if (quotes.length === 0) throw new Error("No quotes returned");
+  // Fetch US prices (parallel)
+  await Promise.all(usSymbols.map(async sym => {
+    try {
+      const price = await fetchUSPrice(sym);
+      if (price) prices[sym] = price;
+    } catch (e) {
+      errors.push(`${sym}: ${e.message}`);
+    }
+  }));
 
-    const prices = {};
-    quotes.forEach(q => {
-      const sym = q.symbol.replace(".TW", "");
-      if (q.regularMarketPrice) prices[sym] = q.regularMarketPrice;
-    });
-
-    res.status(200).json({ prices, updatedAt: new Date().toISOString() });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+  res.status(200).json({
+    prices,
+    updatedAt: new Date().toISOString(),
+    matched: Object.keys(prices).length,
+    total: symbolList.length,
+    errors: errors.length > 0 ? errors : undefined
+  });
 }
