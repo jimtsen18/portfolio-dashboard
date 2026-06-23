@@ -96,40 +96,15 @@ const SEED_DIVS = [
   { id:"d8", symbol:"0056",  market:"TW", date:"2024-08-20", perShare:1.15, sharesHeld:200, totalAmount:1380  },
 ];
 
-// ─── GOOGLE SHEETS CSV SYNC ───────────────────────────────────────────────────
-const SHEETS_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRna9mY_9vyBlCc-x9Zbuk_EN7HvawdiXYBW6j3_OQ-ZFVikKX9c7X2ZDo5CwP4WlGmbUBJg23Jb3Zg/pub?gid=0&single=true&output=csv";
-
-const parseCSV = (text) => {
-  const result = {};
-  text.trim().split("\n").filter(Boolean).forEach(line => {
-    const cols = line.split(",").map(c => c.replace(/^"|"$/g, "").trim());
-    if (cols.length < 2) return;
-    const rawPrice = parseFloat(cols[1].replace(/,/g, ""));
-    if (!cols[0] || isNaN(rawPrice) || rawPrice <= 0) return;
-    result[cols[0].trim()] = rawPrice;
-  });
-  return result;
-};
-
-const matchSymbol = (sym, csvMap) => {
-  const s = sym.toUpperCase();
-  if (csvMap[s] !== undefined) return csvMap[s];
-  for (const [k, v] of Object.entries(csvMap)) {
-    if (k.toUpperCase().includes(s)) return v;
-  }
-  return null;
-};
-
-const fetchPricesFromSheets = async (allSymbols) => {
-  const res = await fetch(SHEETS_CSV_URL, { cache: "no-store" });
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  const csvMap = parseCSV(await res.text());
-  const updated = {};
-  let matchCount = 0;
-  allSymbols.forEach(sym => {
-    const p = matchSymbol(sym, csvMap);
-    if (p !== null) { updated[sym] = p; matchCount++; }
-  });
+// ─── YAHOO FINANCE API (via Vercel Serverless proxy) ─────────────────────────
+const fetchPricesFromAPI = async (allSymbols) => {
+  if (allSymbols.length === 0) return { updated: {}, matchCount: 0, total: 0 };
+  const res = await fetch(`/api/prices?symbols=${allSymbols.join(",")}`, { cache: "no-store" });
+  if (!res.ok) throw new Error(`API error: ${res.status}`);
+  const data = await res.json();
+  if (data.error) throw new Error(data.error);
+  const updated = data.prices || {};
+  const matchCount = Object.keys(updated).length;
   return { updated, matchCount, total: allSymbols.length };
 };
 
@@ -401,7 +376,7 @@ const PriceModal = ({ prices, onClose, onSave }) => {
           ))}
         </div>
         <div style={{ marginTop:20, padding:"12px 16px", background:"#0f1422", borderRadius:8, border:"1px solid #2a3045" }}>
-          <div style={{ color:"#6b7a99", fontSize:11, marginBottom:6 }}>🔗 雲端報價來源（Google Sheets CSV）</div>
+          <div style={{ color:"#6b7a99", fontSize:11, marginBottom:6 }}>🔗 雲端報價來源（Yahoo Finance API）</div>
           <input readOnly value={SHEETS_CSV_URL} style={{ ...INP, color:"#4a5568", fontSize:10 }} />
         </div>
         <button onClick={() => onSave(local)}
@@ -903,9 +878,9 @@ export default function App() {
 
   const syncFromSheets = useCallback(async () => {
     if (!user) return;
-    setSyncStatus("loading"); setSyncMsg("正在連線 Google 試算表…");
+    setSyncStatus("loading"); setSyncMsg("正在抓取最新報價…");
     try {
-      const { updated, matchCount, total } = await fetchPricesFromSheets(allSymbols);
+      const { updated, matchCount, total } = await fetchPricesFromAPI(allSymbols);
       const batch = writeBatch(db);
       Object.entries(updated).forEach(([sym, price]) => {
         batch.set(userDoc(user.uid, COL_PRICES, sym), { symbol: sym, price });
@@ -1693,7 +1668,7 @@ export default function App() {
 
       {/* ── FOOTER ── */}
       <div style={{ marginTop:36, textAlign:"center", color:"#2a3045", fontSize:11 }}>
-        資料同步至 Firebase Firestore（my-portfolio-db-76f01）· 雲端報價：Google Sheets + GOOGLEFINANCE() · USD/TWD 即時匯率 {usdTwd.toFixed(3)}（exchangerate-api.com）· 僅供個人追蹤，非投資建議
+        資料同步至 Firebase Firestore（my-portfolio-db-76f01）· 雲端報價：Yahoo Finance API · USD/TWD 即時匯率 {usdTwd.toFixed(3)}（exchangerate-api.com）· 僅供個人追蹤，非投資建議
       </div>
     </div>
   );
