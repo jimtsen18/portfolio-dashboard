@@ -732,8 +732,11 @@ export default function App() {
 
   // ── Listen for auth state changes ───────────────────────────────────────
   useEffect(() => {
+    // Safety timeout: if auth doesn't resolve in 8s, stop loading
+    const timeout = setTimeout(() => setAuthLoading(false), 8000);
     getRedirectResult(auth).catch(() => {});
     const unsub = onAuthStateChanged(auth, (u) => {
+      clearTimeout(timeout);
       setUser(u);
       setAuthLoading(false);
       if (u) {
