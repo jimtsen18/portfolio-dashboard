@@ -15,7 +15,7 @@ import {
   onSnapshot, setDoc, deleteDoc, writeBatch, getDocs
 } from "firebase/firestore";
 import {
-  getAuth, onAuthStateChanged,
+  getAuth, onAuthStateChanged, getRedirectResult,
   createUserWithEmailAndPassword, signInWithEmailAndPassword,
   signOut, updateProfile,
   GoogleAuthProvider, signInWithPopup, 
@@ -290,14 +290,12 @@ const LoginScreen = () => {
     setErr("");
     setGoogleBusy(true);
     try {
-      await signInWithPopup(auth, googleProvider);
+      await signInWithRedirect(auth, googleProvider);
     } catch (e) {
       console.error("Google Sign-In error:", e.code, e.message);
-      if (e.code !== "auth/popup-closed-by-user" && e.code !== "auth/cancelled-popup-request") {
-        setErr(friendlyError(e.code));
-      }
+      setErr(friendlyError(e.code));
+      setGoogleBusy(false);
     }
-    setGoogleBusy(false);
   };
 
   return (
@@ -731,6 +729,9 @@ export default function App() {
 
   // ── Listen for auth state changes ───────────────────────────────────────
   useEffect(() => {
+    getRedirectResult(auth).then((result) => {
+      if (result?.user) setUser(result.user);
+    }).catch(() => {});
     const unsub = onAuthStateChanged(auth, (u) => {
       setUser(u);
       setAuthLoading(false);
