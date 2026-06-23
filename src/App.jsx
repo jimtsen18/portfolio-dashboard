@@ -633,67 +633,81 @@ const EditTradeModal = ({ trade, onSave, onDelete, onClose }) => {
 // directly (change total shares / average cost in one step), we compute the
 // delta needed and write it as a single adjustment trade tagged isAdjustment.
 const EditPositionModal = ({ position, onSave, onClose }) => {
-  const [shares, setShares] = useState(String(position.shares));
-  const [wac,    setWac]    = useState(position.wac.toFixed(2));
-  const [saving, setSaving] = useState(false);
-  const [err,    setErr]    = useState("");
+  const cur  = position.market === "TW" ? "NT$" : "$";
+  const step = position.market === "US" ? "0.00001" : "1";
+  const [shares,    setSharesRaw]    = useState(String(position.shares));
+  const [wac,       setWacRaw]       = useState(position.wac.toFixed(2));
+  const [totalCost, setTotalCostRaw] = useState((position.shares * position.wac).toFixed(2));
+  const [saving,    setSaving]       = useState(false);
+  const [err,       setErr]          = useState("");
+  const [lastEdited, setLastEdited]  = useState("wac");
 
+  const handleShares = (e) => {
+    const v = e.target.value; setSharesRaw(v); setLastEdited("shares");
+    const s = parseFloat(v)||0, w = parseFloat(wac)||0;
+    setTotalCostRaw((s*w).toFixed(2));
+  };
+  const handleWac = (e) => {
+    const v = e.target.value; setWacRaw(v); setLastEdited("wac");
+    const w = parseFloat(v)||0, s = parseFloat(shares)||0;
+    setTotalCostRaw((s*w).toFixed(2));
+  };
+  const handleTotalCost = (e) => {
+    const v = e.target.value; setTotalCostRaw(v); setLastEdited("totalCost");
+    const t = parseFloat(v)||0, s = parseFloat(shares)||0;
+    if (s > 0) setWacRaw((t/s).toFixed(2));
+  };
   const handleSave = async () => {
-    const newShares = parseFloat(shares);
-    const newWac    = parseFloat(wac);
-    if (isNaN(newShares) || newShares < 0 || isNaN(newWac) || newWac < 0) {
-      setErr("請輸入有效的股數與成本"); return;
-    }
+    const newShares = parseFloat(shares), newWac = parseFloat(wac);
+    if (isNaN(newShares)||newShares<0||isNaN(newWac)||newWac<0) { setErr("請輸入有效數值"); return; }
     setSaving(true);
-    // Write a single "rebase" adjustment trade that resets this symbol's
-    // aggregate buy cost basis to the values the user entered. We do this by
-    // deleting all prior buy trades' effect via a synthetic adjustment record
-    // — represented as a special buy trade dated today with isAdjustment:true,
-    // alongside a one-time clearing flag the app understands at build time.
-    await onSave({
-      symbol: position.symbol,
-      market: position.market,
-      shares: newShares,
-      wac: newWac,
-    });
+    await onSave({ symbol:position.symbol, market:position.market, shares:newShares, wac:newWac });
     setSaving(false);
   };
-
+  const origTotal = (position.shares * position.wac).toFixed(2);
   return (
     <div style={{ position:"fixed", inset:0, background:"rgba(0,0,0,0.75)", zIndex:999, display:"flex", alignItems:"center", justifyContent:"center" }}
       onClick={e => { if (e.target===e.currentTarget) onClose(); }}>
-      <div style={{ background:"#1a1f2e", border:"1px solid #2a3045", borderRadius:16, padding:28, width:420 }}>
+      <div style={{ background:"#1a1f2e", border:"1px solid #2a3045", borderRadius:16, padding:28, width:480 }}>
         <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:6 }}>
           <span style={{ color:"#e2e8f0", fontWeight:700, fontSize:16 }}>✏️ 編輯持股 — {position.symbol}</span>
           <button onClick={onClose} style={{ background:"none", border:"none", color:"#6b7a99", cursor:"pointer", fontSize:22, lineHeight:1 }}>×</button>
         </div>
-        <div style={{ color:"#6b7a99", fontSize:12, marginBottom:18 }}>
-          直接修改庫存股數與加權平均成本。系統會自動寫入一筆校正交易來對齊新數值。
-        </div>
-
-        <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:12 }}>
+        <div style={{ color:"#6b7a99", fontSize:12, marginBottom:18 }}>三個欄位互相連動：改任一欄，其他欄位自動計算。</div>
+        <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1fr", gap:12 }}>
           <div>
             <div style={LBL}>庫存股數</div>
-            <input type="number" step={position.market==="US"?"0.00001":"1"} value={shares} onChange={e=>setShares(e.target.value)} style={INP} />
+            <input type="number" step={step} value={shares} onChange={handleShares}
+              style={{ ...INP, borderColor: lastEdited==="shares"?"#38bdf8":"#2a3045" }} />
           </div>
           <div>
-            <div style={LBL}>加權平均成本（{position.market==="TW"?"NT$":"$"}）</div>
-            <input type="number" step="0.01" value={wac} onChange={e=>setWac(e.target.value)} style={INP} />
+            <div style={LBL}>加權平均成本（{cur}）</div>
+            <input type="number" step="0.01" value={wac} onChange={handleWac}
+              style={{ ...INP, borderColor: lastEdited==="wac"?"#a78bfa":"#2a3045" }} />
+          </div>
+          <div>
+            <div style={LBL}>持倉總成本（{cur}）</div>
+            <input type="number" step="0.01" value={totalCost} onChange={handleTotalCost}
+              style={{ ...INP, borderColor: lastEdited==="totalCost"?"#34d399":"#2a3045" }} />
           </div>
         </div>
-
-        <div style={{ marginTop:14, padding:"10px 14px", background:"#0f1422", borderRadius:8, border:"1px solid #2a3045", fontSize:12, color:"#6b7a99" }}>
-          原始：{fmt(position.shares, position.market==="US"?5:0)} 股 ・ 均價 {position.market==="TW"?"NT$":"$"}{position.wac.toFixed(2)}
-          <br/>
-          新值後總成本約為 {position.market==="TW"?"NT$":"$"}{(parseFloat(shares||0)*parseFloat(wac||0)).toFixed(2)}
+        <div style={{ display:"flex", gap:12, marginTop:8, fontSize:11 }}>
+          <span style={{ color:"#38bdf8" }}>● 股數</span>
+          <span style={{ color:"#a78bfa" }}>● 均價</span>
+          <span style={{ color:"#34d399" }}>● 總成本（÷股數→均價）</span>
         </div>
-
+        <div style={{ marginTop:12, padding:"10px 14px", background:"#0f1422", borderRadius:8, border:"1px solid #2a3045", fontSize:12 }}>
+          <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1fr", gap:8, textAlign:"center" }}>
+            <div><div style={{ color:"#4a5568", marginBottom:3 }}>原始股數</div><div style={{ color:"#8892a8" }}>{fmt(position.shares, position.market==="US"?5:0)}</div></div>
+            <div><div style={{ color:"#4a5568", marginBottom:3 }}>原始均價</div><div style={{ color:"#8892a8" }}>{cur}{position.wac.toFixed(2)}</div></div>
+            <div><div style={{ color:"#4a5568", marginBottom:3 }}>原始總成本</div><div style={{ color:"#8892a8" }}>{cur}{origTotal}</div></div>
+          </div>
+        </div>
         {err && <div style={{ color:"#f87171", fontSize:12, marginTop:8 }}>{err}</div>}
-
         <button onClick={handleSave} disabled={saving}
           style={{ marginTop:16, width:"100%", background:"linear-gradient(135deg,#1e40af,#7c3aed)", border:"none", borderRadius:8, color:"#fff",
             padding:"10px 0", fontWeight:700, cursor:"pointer", fontSize:14, opacity:saving?0.6:1 }}>
-          {saving ? "儲存中…" : "套用修改"}
+          {saving?"儲存中…":"套用修改"}
         </button>
       </div>
     </div>
