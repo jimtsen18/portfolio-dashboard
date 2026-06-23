@@ -750,13 +750,6 @@ export default function App() {
     return unsub;
   }, []);
 
-  // Catch the result of a redirect-based Google sign-in (mobile/popup-blocked fallback)
-  useEffect(() => {
-    (auth).catch(err => {
-      console.error("Google redirect sign-in error:", err.code, err.message);
-    });
-  }, []);
-
   // ── Seed Firestore if empty (per user) ───────────────────────────────────
   const seedIfEmpty = useCallback(async (uid) => {
     if (seededRef.current) return;
