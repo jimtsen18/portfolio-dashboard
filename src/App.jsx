@@ -1426,7 +1426,7 @@ export default function App() {
                             <span style={{ color:"#a78bfa", fontSize:11, fontWeight:700, letterSpacing:"0.1em" }}>🇺🇸 美股</span>
                           </td>
                         </tr>
-                      )}
+                      ))}
                       {posSort.col==="category" && i===0 && (
                         <tr key="sep-tw">
                           <td colSpan={11} style={{ padding:"6px 14px", background:"#0d1424", borderBottom:"1px solid #2a3045" }}>
@@ -1717,4 +1717,5 @@ export default function App() {
       </div>
     </div>
   );
+}
 }
