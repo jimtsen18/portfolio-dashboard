@@ -5,31 +5,44 @@ export default async function handler(req, res) {
   const { symbols } = req.query;
   if (!symbols) return res.status(400).json({ error: "Missing symbols" });
 
-  // Convert TW symbols: 2330 → 2330.TW, 00919 → 00919.TW
-  // US symbols stay as-is: AAPL → AAPL
-  const TW_SYMBOLS = ["00919","006208","2330","0056","00878"];
-  
   const symbolList = symbols.split(",").map(s => s.trim());
-  const yahooSymbols = symbolList.map(s => 
-    TW_SYMBOLS.includes(s) || /^\d/.test(s) ? `${s}.TW` : s
+  const yahooSymbols = symbolList.map(s =>
+    /^\d/.test(s) ? `${s}.TW` : s
   ).join(",");
 
   try {
-    const url = `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${yahooSymbols}&fields=regularMarketPrice,symbol`;
-    const response = await fetch(url, {
+    // Step 1: get crumb
+    const crumbRes = await fetch("https://query2.finance.yahoo.com/v1/test/getcrumb", {
       headers: {
-        "User-Agent": "Mozilla/5.0",
+        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+        "Accept": "*/*",
+        "Accept-Language": "en-US,en;q=0.9",
+        "Referer": "https://finance.yahoo.com/",
+        "Cookie": "tbla_id=; GUC=AQABCAFn; A1=d=AQABB; A3=d=AQABB",
+      }
+    });
+    const crumb = await crumbRes.text();
+
+    // Step 2: fetch quotes with crumb
+    const url = `https://query2.finance.yahoo.com/v7/finance/quote?symbols=${yahooSymbols}&crumb=${encodeURIComponent(crumb.trim())}`;
+    const quoteRes = await fetch(url, {
+      headers: {
+        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
         "Accept": "application/json",
+        "Accept-Language": "en-US,en;q=0.9",
+        "Referer": "https://finance.yahoo.com/",
+        "Cookie": "tbla_id=; GUC=AQABCAFn; A1=d=AQABB; A3=d=AQABB",
       }
     });
 
-    if (!response.ok) throw new Error(`Yahoo API error: ${response.status}`);
-    const data = await response.json();
+    if (!quoteRes.ok) throw new Error(`Yahoo API error: ${quoteRes.status}`);
+    const data = await quoteRes.json();
     const quotes = data?.quoteResponse?.result || [];
+
+    if (quotes.length === 0) throw new Error("No quotes returned");
 
     const prices = {};
     quotes.forEach(q => {
-      // Strip .TW suffix to match our internal symbol format
       const sym = q.symbol.replace(".TW", "");
       if (q.regularMarketPrice) prices[sym] = q.regularMarketPrice;
     });
