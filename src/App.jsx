@@ -736,10 +736,14 @@ export default function App() {
     const unsub = onAuthStateChanged(auth, (u) => {
       setUser(u);
       setAuthLoading(false);
-      // Reset per-user state when account changes (e.g. logout → login as someone else)
-      seededRef.current = false;
-      setTrades([]); setDividends([]); setPrices(SEED_PRICES);
-      setDbLoading(true);
+      if (u) {
+        // Reset per-user state when account changes
+        seededRef.current = false;
+        setTrades([]); setDividends([]); setPrices(SEED_PRICES);
+        setDbLoading(true);
+      } else {
+        setDbLoading(false);
+      }
     });
     return unsub;
   }, []);
