@@ -291,17 +291,9 @@ const LoginScreen = () => {
     setGoogleBusy(true);
     try {
       await signInWithPopup(auth, googleProvider);
-      // onAuthStateChanged in the parent App component picks up the new user automatically
     } catch (e) {
       console.error("Google Sign-In error:", e.code, e.message);
-      if (e.code === "auth/popup-blocked" || e.code === "auth/operation-not-supported-in-this-environment") {
-        // Mobile browsers / in-app webviews often block popups — fall back to redirect flow
-        try {
-          return; // page will navigate away; no further state updates needed here
-        } catch (e2) {
-          setErr(friendlyError(e2.code));
-        }
-      } else {
+      if (e.code !== "auth/popup-closed-by-user" && e.code !== "auth/cancelled-popup-request") {
         setErr(friendlyError(e.code));
       }
     }
