@@ -743,17 +743,7 @@ export default function App() {
   const seedIfEmpty = useCallback(async (uid) => {
     if (seededRef.current) return;
     seededRef.current = true;
-    const snap = await getDocs(userCol(uid, COL_TRADES));
-    if (snap.empty) {
-      setDbStatus("首次啟動，正在寫入示範資料…");
-      const batch = writeBatch(db);
-      SEED_TRADES.forEach(t  => batch.set(userDoc(uid, COL_TRADES, t.id), t));
-      SEED_DIVS.forEach(d    => batch.set(userDoc(uid, COL_DIVIDENDS, d.id), d));
-      Object.entries(SEED_PRICES).forEach(([sym, price]) =>
-        batch.set(userDoc(uid, COL_PRICES, sym), { symbol:sym, price })
-      );
-      await batch.commit();
-    }
+    // New users start with clean data — no seed data written
   }, []);
 
   // ── onSnapshot listeners (per user) ──────────────────────────────────────
