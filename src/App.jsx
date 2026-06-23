@@ -45,6 +45,7 @@ const COL_TRADES    = "portfolio_trades";
 const COL_DIVIDENDS = "portfolio_dividends";
 const COL_PRICES    = "portfolio_prices";
 const COL_META      = "portfolio_meta";
+const COL_SNAPSHOTS = "portfolio_snapshots"; // daily market value history
 
 // ─── CONSTANTS ───────────────────────────────────────────────────────────────
 const TW_STOCKS = ["00919", "006208", "2330", "0056", "00878"];
@@ -697,6 +698,7 @@ export default function App() {
 
   // ── Firebase-backed state ────────────────────────────────────────────────
   const [trades,    setTrades]    = useState([]);
+  const [snapshots, setSnapshots] = useState([]);
   const [dividends, setDividends] = useState([]);
   const [prices,    setPrices]    = useState(SEED_PRICES);
   const [lastSynced, setLastSynced] = useState(null);
@@ -777,12 +779,19 @@ export default function App() {
         ready.prices = true; check();
       });
 
+      const unsubSnapshots = onSnapshot(userCol(uid, COL_SNAPSHOTS), snap => {
+        const data = snap.docs
+          .map(d => d.data())
+          .sort((a, b) => a.date.localeCompare(b.date));
+        setSnapshots(data);
+      });
+
       const unsubMeta = onSnapshot(userDoc(uid, COL_META, "sync_info"), snap => {
         if (snap.exists()) setLastSynced(snap.data().lastSynced || null);
       });
 
       // Stash unsub functions so the cleanup below can call them
-      seedIfEmpty._unsub = () => { unsubTrades(); unsubDivs(); unsubPrices(); unsubMeta(); };
+      seedIfEmpty._unsub = () => { unsubTrades(); unsubDivs(); unsubPrices(); unsubSnapshots(); unsubMeta(); };
     });
 
     return () => { if (seedIfEmpty._unsub) seedIfEmpty._unsub(); };
@@ -876,7 +885,22 @@ export default function App() {
         batch.set(userDoc(user.uid, COL_PRICES, sym), { symbol: sym, price });
       });
       const now = new Date().toLocaleString("zh-TW", { hour12: false });
+      const today = new Date().toISOString().slice(0, 10);
       batch.set(userDoc(user.uid, COL_META, "sync_info"), { lastSynced: now });
+      // Save daily market value snapshot
+      const snapTotalTWD = Math.round(
+        positions.reduce((s, p) => s + p.valueInTWD, 0)
+      );
+      const snapTotalCost = Math.round(
+        positions.reduce((s, p) => s + (p.market === "US" ? p.totalBuyCost * usdTwd : p.totalBuyCost), 0)
+      );
+      if (snapTotalTWD > 0) {
+        batch.set(userDoc(user.uid, COL_SNAPSHOTS, today), {
+          date: today,
+          marketValue: snapTotalTWD,
+          totalCost: snapTotalCost,
+        });
+      }
       await batch.commit();
       setSyncStatus("success");
       setSyncMsg(`已更新 ${matchCount}/${total} 支標的 · ${now}`);
@@ -1010,6 +1034,18 @@ export default function App() {
     });
     return Object.entries(map).sort(([a],[b]) => a.localeCompare(b)).map(([k,v]) => ({ month:k, value:Math.round(v) }));
   })();
+
+  // ── Filtered snapshot data for market value chart ───────────────────────────
+  const filteredSnapshots = snapshots.filter(s => {
+    if (yearFilter) {
+      return s.date >= yearFilter + "-01-01" && s.date <= yearFilter + "-12-31";
+    }
+    if (period.label === "ALL") return true;
+    const cutoff = period.label === "YTD"
+      ? new Date(new Date().getFullYear(), 0, 1).toISOString().slice(0, 10)
+      : daysAgo(period.days).toISOString().slice(0, 10);
+    return s.date >= cutoff;
+  });
 
   // ── Render guards ─────────────────────────────────────────────────────────
   if (authLoading) return <LoadingScreen status="正在確認登入狀態…" />;
@@ -1297,6 +1333,47 @@ export default function App() {
             </ResponsiveContainer>
             {gainBarData.length===0 && (
               <div style={{ color:"#4a5568", fontSize:12, textAlign:"center", marginTop:40 }}>此期間無賣出紀錄</div>
+            )}
+          </div>
+
+          {/* Line chart: market value vs cost over time */}
+          <div style={{ background:"#1a1f2e", border:"1px solid #2a3045", borderRadius:12, padding:20, gridColumn:"1 / -1" }}>
+            <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:12 }}>
+              <div style={{ color:"#8892a8", fontSize:12 }}>總市值 vs 持倉成本走勢（{activePeriodLabel}，TWD）</div>
+              {filteredSnapshots.length === 0 && (
+                <span style={{ color:"#4a5568", fontSize:11 }}>尚無歷史快照・每次同步報價時自動記錄一筆</span>
+              )}
+            </div>
+            {filteredSnapshots.length >= 2 ? (
+              <ResponsiveContainer width="100%" height={240}>
+                <LineChart data={filteredSnapshots} margin={{ top:4, right:16, left:0, bottom:0 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#1e2535" />
+                  <XAxis dataKey="date" tick={{ fill:"#6b7a99", fontSize:10 }}
+                    tickFormatter={v => v.slice(5)} />
+                  <YAxis tick={{ fill:"#6b7a99", fontSize:10 }}
+                    tickFormatter={v => "NT$" + (v >= 1000000 ? (v/1000000).toFixed(1)+"M" : (v/1000).toFixed(0)+"K")} />
+                  <Tooltip
+                    contentStyle={{ background:"#0f1422", border:"1px solid #2a3045", borderRadius:8 }}
+                    formatter={(v, name) => ["NT$" + new Intl.NumberFormat("zh-TW").format(v), name]}
+                    labelFormatter={l => "日期：" + l}
+                  />
+                  <Legend formatter={v => <span style={{ color:"#8892a8", fontSize:12 }}>{v}</span>} />
+                  <Line type="monotone" dataKey="marketValue" name="總市值"
+                    stroke="#38bdf8" strokeWidth={2} dot={filteredSnapshots.length <= 30}
+                    activeDot={{ r:5 }} />
+                  <Line type="monotone" dataKey="totalCost" name="持倉成本"
+                    stroke="#a78bfa" strokeWidth={2} strokeDasharray="5 5"
+                    dot={false} activeDot={{ r:4 }} />
+                </LineChart>
+              </ResponsiveContainer>
+            ) : filteredSnapshots.length === 1 ? (
+              <div style={{ color:"#4a5568", fontSize:12, textAlign:"center", paddingTop:60 }}>
+                已記錄 1 筆快照（{filteredSnapshots[0].date}），再同步一次即可顯示走勢圖
+              </div>
+            ) : (
+              <div style={{ color:"#4a5568", fontSize:12, textAlign:"center", paddingTop:60 }}>
+                點擊「🔄 同步最新雲端報價」開始記錄市值歷史，每次同步自動儲存一筆
+              </div>
             )}
           </div>
         </div>
