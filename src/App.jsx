@@ -32,7 +32,10 @@ const firebaseConfig = {
   measurementId:     "G-P6YC4DR214",
 };
 
-const fbApp  = initializeApp(firebaseConfig);
+const fbApp  = initializeApp({
+  ...firebaseConfig,
+  authDomain: "portfolio-dashboard-five-neon.vercel.app",
+});
 const db     = getFirestore(fbApp);
 const auth   = getAuth(fbApp);
 const googleProvider = new GoogleAuthProvider();
