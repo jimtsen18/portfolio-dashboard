@@ -18,7 +18,7 @@ import {
   getAuth, onAuthStateChanged, getRedirectResult,
   createUserWithEmailAndPassword, signInWithEmailAndPassword,
   signOut, updateProfile,
-  GoogleAuthProvider, signInWithPopup, 
+  GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult, 
   
 } from "firebase/auth";
 
