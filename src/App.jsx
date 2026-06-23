@@ -18,8 +18,8 @@ import {
   getAuth, onAuthStateChanged,
   createUserWithEmailAndPassword, signInWithEmailAndPassword,
   signOut, updateProfile,
-  GoogleAuthProvider, signInWithPopup, signInWithRedirect,
-  getRedirectResult
+  GoogleAuthProvider, signInWithPopup, 
+  
 } from "firebase/auth";
 
 const firebaseConfig = {
@@ -297,7 +297,6 @@ const LoginScreen = () => {
       if (e.code === "auth/popup-blocked" || e.code === "auth/operation-not-supported-in-this-environment") {
         // Mobile browsers / in-app webviews often block popups — fall back to redirect flow
         try {
-          await signInWithRedirect(auth, googleProvider);
           return; // page will navigate away; no further state updates needed here
         } catch (e2) {
           setErr(friendlyError(e2.code));
@@ -753,7 +752,7 @@ export default function App() {
 
   // Catch the result of a redirect-based Google sign-in (mobile/popup-blocked fallback)
   useEffect(() => {
-    getRedirectResult(auth).catch(err => {
+    (auth).catch(err => {
       console.error("Google redirect sign-in error:", err.code, err.message);
     });
   }, []);
