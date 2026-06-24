@@ -130,7 +130,10 @@ const buildPositions = (trades) => {
       if (pos.totalBuyCost < 0) pos.totalBuyCost = 0;
     }
   });
-  return Object.values(map).filter(p => p.shares > 0 || p.realizedGain !== 0);
+  return Object.values(map).map(p => ({
+    ...p,
+    wac: p.shares > 0 ? p.totalBuyCost / p.shares : 0,
+  })).filter(p => p.shares > 0 || p.realizedGain !== 0);
 };
 
 // ─── UTILS ───────────────────────────────────────────────────────────────────
