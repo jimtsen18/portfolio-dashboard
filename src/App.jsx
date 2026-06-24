@@ -638,10 +638,17 @@ const EditPositionModal = ({ position, onSave, onClose }) => {
     if (s > 0) setWacRaw((t/s).toFixed(2));
   };
   const handleSave = async () => {
+    console.log("handleSave called");
     const newShares = parseFloat(shares), newWac = parseFloat(wac);
+    console.log("shares:", newShares, "wac:", newWac);
     if (isNaN(newShares)||newShares<0||isNaN(newWac)||newWac<0) { setErr("請輸入有效數值"); return; }
     setSaving(true);
-    await onSave({ symbol:position.symbol, market:position.market, shares:newShares, wac:newWac });
+    try {
+      await onSave({ symbol:position.symbol, market:position.market, shares:newShares, wac:newWac });
+      console.log("onSave completed");
+    } catch(e) {
+      console.error("onSave error:", e);
+    }
     setSaving(false);
   };
   const origTotal = (position.shares * position.wac).toFixed(2);
