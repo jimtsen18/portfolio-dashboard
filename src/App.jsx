@@ -1291,20 +1291,6 @@ export default function App() {
             </ResponsiveContainer>
           </div>
 
-          {/* Bar: cost vs value */}
-          <div style={{ background:"#1a1f2e", border:"1px solid #2a3045", borderRadius:12, padding:20, gridColumn:"1 / -1" }}>
-            <div style={{ color:"#8892a8", fontSize:12, marginBottom:12 }}>成本 vs 現值對比（TWD）</div>
-            <ResponsiveContainer width="100%" height={220}>
-              <BarChart data={assetBarData} margin={{ top:4, right:16, left:0, bottom:0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#1e2535" />
-                <XAxis dataKey="name" tick={{ fill:"#6b7a99", fontSize:11 }} />
-                <YAxis tick={{ fill:"#6b7a99", fontSize:10 }} tickFormatter={v=>"NT$"+(v>=1000?(v/1000).toFixed(0)+"K":v)} />
-                <Tooltip content={<CustomTooltip />} />
-                <Bar dataKey="成本" fill="#1e3a5f" radius={[4,4,0,0]} />
-                <Bar dataKey="現值" fill="#38bdf8" radius={[4,4,0,0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
 
           {/* Bar: monthly dividends */}
           <div style={{ background:"#1a1f2e", border:"1px solid #2a3045", borderRadius:12, padding:20 }}>
