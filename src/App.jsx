@@ -1255,6 +1255,46 @@ export default function App() {
       {/* ══════════════════════════════════════════════════════════════════════ */}
       {tab==="overview" && (
         <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:20 }}>
+          {/* Line chart: market value vs cost over time */}
+          <div style={{ background:"#1a1f2e", border:"1px solid #2a3045", borderRadius:12, padding:20, gridColumn:"1 / -1" }}>
+            <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:12 }}>
+              <div style={{ color:"#8892a8", fontSize:12 }}>總市值 vs 持倉成本走勢（{activePeriodLabel}，TWD）</div>
+              {filteredSnapshots.length === 0 && (
+                <span style={{ color:"#4a5568", fontSize:11 }}>尚無歷史快照・每次同步報價時自動記錄一筆</span>
+              )}
+            </div>
+            {filteredSnapshots.length >= 2 ? (
+              <ResponsiveContainer width="100%" height={240}>
+                <LineChart data={filteredSnapshots} margin={{ top:4, right:16, left:0, bottom:0 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#1e2535" />
+                  <XAxis dataKey="date" tick={{ fill:"#6b7a99", fontSize:10 }}
+                    tickFormatter={v => v.slice(5)} />
+                  <YAxis tick={{ fill:"#6b7a99", fontSize:10 }}
+                    tickFormatter={v => "NT$" + (v >= 1000000 ? (v/1000000).toFixed(1)+"M" : (v/1000).toFixed(0)+"K")} />
+                  <Tooltip
+                    contentStyle={{ background:"#0f1422", border:"1px solid #2a3045", borderRadius:8 }}
+                    formatter={(v, name) => ["NT$" + new Intl.NumberFormat("zh-TW").format(v), name]}
+                    labelFormatter={l => "日期：" + l}
+                  />
+                  <Legend formatter={v => <span style={{ color:"#8892a8", fontSize:12 }}>{v}</span>} />
+                  <Line type="monotone" dataKey="marketValue" name="總市值"
+                    stroke="#38bdf8" strokeWidth={2} dot={filteredSnapshots.length <= 30}
+                    activeDot={{ r:5 }} />
+                  <Line type="monotone" dataKey="totalCost" name="持倉成本"
+                    stroke="#a78bfa" strokeWidth={2} strokeDasharray="5 5"
+                    dot={false} activeDot={{ r:4 }} />
+                </LineChart>
+              </ResponsiveContainer>
+            ) : filteredSnapshots.length === 1 ? (
+              <div style={{ color:"#4a5568", fontSize:12, textAlign:"center", paddingTop:60 }}>
+                已記錄 1 筆快照（{filteredSnapshots[0].date}），再同步一次即可顯示走勢圖
+              </div>
+            ) : (
+              <div style={{ color:"#4a5568", fontSize:12, textAlign:"center", paddingTop:60 }}>
+                點擊「🔄 同步最新雲端報價」開始記錄市值歷史，每次同步自動儲存一筆
+              </div>
+            )}
+          </div>
           {/* Donut: individual weights */}
           <div style={{ background:"#1a1f2e", border:"1px solid #2a3045", borderRadius:12, padding:20 }}>
             <div style={{ color:"#8892a8", fontSize:12, marginBottom:12 }}>個股持倉權重分佈</div>
@@ -1323,46 +1363,6 @@ export default function App() {
             )}
           </div>
 
-          {/* Line chart: market value vs cost over time */}
-          <div style={{ background:"#1a1f2e", border:"1px solid #2a3045", borderRadius:12, padding:20, gridColumn:"1 / -1" }}>
-            <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:12 }}>
-              <div style={{ color:"#8892a8", fontSize:12 }}>總市值 vs 持倉成本走勢（{activePeriodLabel}，TWD）</div>
-              {filteredSnapshots.length === 0 && (
-                <span style={{ color:"#4a5568", fontSize:11 }}>尚無歷史快照・每次同步報價時自動記錄一筆</span>
-              )}
-            </div>
-            {filteredSnapshots.length >= 2 ? (
-              <ResponsiveContainer width="100%" height={240}>
-                <LineChart data={filteredSnapshots} margin={{ top:4, right:16, left:0, bottom:0 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#1e2535" />
-                  <XAxis dataKey="date" tick={{ fill:"#6b7a99", fontSize:10 }}
-                    tickFormatter={v => v.slice(5)} />
-                  <YAxis tick={{ fill:"#6b7a99", fontSize:10 }}
-                    tickFormatter={v => "NT$" + (v >= 1000000 ? (v/1000000).toFixed(1)+"M" : (v/1000).toFixed(0)+"K")} />
-                  <Tooltip
-                    contentStyle={{ background:"#0f1422", border:"1px solid #2a3045", borderRadius:8 }}
-                    formatter={(v, name) => ["NT$" + new Intl.NumberFormat("zh-TW").format(v), name]}
-                    labelFormatter={l => "日期：" + l}
-                  />
-                  <Legend formatter={v => <span style={{ color:"#8892a8", fontSize:12 }}>{v}</span>} />
-                  <Line type="monotone" dataKey="marketValue" name="總市值"
-                    stroke="#38bdf8" strokeWidth={2} dot={filteredSnapshots.length <= 30}
-                    activeDot={{ r:5 }} />
-                  <Line type="monotone" dataKey="totalCost" name="持倉成本"
-                    stroke="#a78bfa" strokeWidth={2} strokeDasharray="5 5"
-                    dot={false} activeDot={{ r:4 }} />
-                </LineChart>
-              </ResponsiveContainer>
-            ) : filteredSnapshots.length === 1 ? (
-              <div style={{ color:"#4a5568", fontSize:12, textAlign:"center", paddingTop:60 }}>
-                已記錄 1 筆快照（{filteredSnapshots[0].date}），再同步一次即可顯示走勢圖
-              </div>
-            ) : (
-              <div style={{ color:"#4a5568", fontSize:12, textAlign:"center", paddingTop:60 }}>
-                點擊「🔄 同步最新雲端報價」開始記錄市值歷史，每次同步自動儲存一筆
-              </div>
-            )}
-          </div>
         </div>
       )}
 
