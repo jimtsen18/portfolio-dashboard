@@ -1277,7 +1277,7 @@ export default function App() {
       })()}
 
       {/* ── KPI ROW 1 ── */}
-      <div className="kpi-all" style={{ display:"grid", gridTemplateColumns:"repeat(4,1fr)", gap:12, marginBottom:24 }}>
+      <div className="kpi-all" style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:12, marginBottom:24 }}>
         <div className="kpi-order-1"><KPICard label="總市值（TWD）"   value={"NT$"+fmt(totalTWD)}           sub={"投入成本 NT$"+fmt(totalCost)}   color={CARD_COLORS.totalValue} /></div>
         <div className="kpi-order-2"><KPICard label="未實現損益"       value={"NT$"+fmtSign(totalUnreal)}    sub={fmtPct(totalROI)+" vs 成本"}    color={CARD_COLORS.unrealized} /></div>
         <div className="kpi-order-3"><KPICard label={activePeriodLabel+" 股息收入"} value={"NT$"+fmt(divIncome)}   sub={"含即時換匯 ×"+usdTwd.toFixed(2)}    color={CARD_COLORS.div}        /></div>
