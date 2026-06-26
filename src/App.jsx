@@ -635,7 +635,11 @@ const EditPositionModal = ({ position, onSave, onClose }) => {
   const handleTotalCost = (e) => {
     const v = e.target.value; setTotalCostRaw(v); setLastEdited("totalCost");
     const t = parseFloat(v)||0, s = parseFloat(shares)||0;
-    if (s > 0) setWacRaw((Math.round((t/s) * 1e6) / 1e6).toFixed(6));
+    if (s > 0) {
+      const rounded = Math.round((t / s) * 100) / 100;
+      setWacRaw(rounded.toFixed(2));
+      setTotalCostRaw((rounded * s).toFixed(2));
+    }
   };
   const handleSave = async () => {
     const newShares = parseFloat(shares);
