@@ -393,41 +393,6 @@ const LoginScreen = () => {
   );
 };
 
-// ─── PRICE MODAL ─────────────────────────────────────────────────────────────
-const PriceModal = ({ prices, onClose, onSave }) => {
-  const [local, setLocal] = useState({ ...prices });
-  const all = [...TW_STOCKS, ...US_STOCKS];
-  return (
-    <div style={{ position:"fixed", inset:0, background:"rgba(0,0,0,0.75)", zIndex:999, display:"flex", alignItems:"center", justifyContent:"center" }}
-      onClick={e => { if (e.target===e.currentTarget) onClose(); }}>
-      <div style={{ background:"#1a1f2e", border:"1px solid #2a3045", borderRadius:16, padding:28, width:460, maxHeight:"82vh", overflowY:"auto" }}>
-        <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:20 }}>
-          <span style={{ color:"#e2e8f0", fontWeight:700, fontSize:16 }}>手動覆寫現價</span>
-          <button onClick={onClose} style={{ background:"none", border:"none", color:"#6b7a99", cursor:"pointer", fontSize:22, lineHeight:1 }}>×</button>
-        </div>
-        <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:12 }}>
-          {all.map(sym => (
-            <div key={sym} style={{ background:"#0f1422", borderRadius:8, padding:"10px 12px", border:"1px solid #2a3045" }}>
-              <div style={{ color:"#8892a8", fontSize:11, marginBottom:4 }}>{sym} {TW_STOCKS.includes(sym)?"🇹🇼":"🇺🇸"}</div>
-              <input type="number" step="0.01" value={local[sym]??""}
-                onChange={e => setLocal(p => ({ ...p, [sym]: parseFloat(e.target.value)||0 }))}
-                style={{ ...INP, padding:"4px 8px", fontSize:14 }} />
-            </div>
-          ))}
-        </div>
-        <div style={{ marginTop:20, padding:"12px 16px", background:"#0f1422", borderRadius:8, border:"1px solid #2a3045" }}>
-          <div style={{ color:"#6b7a99", fontSize:11, marginBottom:6 }}>🔗 雲端報價來源（Yahoo Finance API）</div>
-          <input readOnly value={SHEETS_CSV_URL} style={{ ...INP, color:"#4a5568", fontSize:10 }} />
-        </div>
-        <button onClick={() => onSave(local)}
-          style={{ marginTop:16, width:"100%", background:"linear-gradient(135deg,#1e40af,#7c3aed)", border:"none", borderRadius:8, color:"#fff", padding:"10px 0", fontWeight:700, cursor:"pointer", fontSize:14 }}>
-          儲存現價到雲端
-        </button>
-      </div>
-    </div>
-  );
-};
-
 // ─── ADD TRADE FORM ───────────────────────────────────────────────────────────
 const AddTradeForm = ({ onAdd }) => {
   const blank = { type:"buy", symbol:"", market:"TW", date:new Date().toISOString().slice(0,10), shares:"", price:"", fee:"0" };
