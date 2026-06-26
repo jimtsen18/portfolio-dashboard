@@ -1334,6 +1334,7 @@ export default function App() {
                     <div style={{ background:"#e2e8f0", border:"1px solid #94a3b8", borderRadius:8, padding:"8px 12px", color:"#1a202c" }}>
                       <div style={{ fontWeight:700, marginBottom:4 }}>{d.name}</div>
                       <div>{"NT$"+fmt(d.value)}</div>
+                      <div style={{ color:"#4a5568", fontSize:11, marginTop:2 }}>{totalTWD>0?(d.value/totalTWD*100).toFixed(1):0}%</div>
                     </div>
                   );
                 }} />
