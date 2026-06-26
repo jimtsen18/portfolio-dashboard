@@ -1378,6 +1378,14 @@ export default function App() {
                 <Bar dataKey="value" name="股息" fill="#34d399" radius={[4,4,0,0]} />
               </BarChart>
             </ResponsiveContainer>
+            {monthlyDivData.length > 0 && (
+              <div style={{ marginTop:10, display:"flex", justifyContent:"flex-end", alignItems:"center", gap:6 }}>
+                <span style={{ color:"#6b7a99", fontSize:11 }}>月均股息</span>
+                <span style={{ color:"#34d399", fontWeight:700, fontSize:13 }}>
+                  {"NT$"+fmt(Math.round(monthlyDivData.reduce((s,m)=>s+m.value,0)/monthlyDivData.length))}
+                </span>
+              </div>
+            )}
           </div>
 
           {/* Bar: realized gains */}
