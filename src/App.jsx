@@ -1669,7 +1669,15 @@ export default function App() {
                             <Badge color={s.market==="TW"?"#38bdf8":"#a78bfa"}>{s.market==="TW"?"台股":"美股"}</Badge>
                             <span style={{ color:"#4a5568", fontSize:11 }}>{s.count} 筆</span>
                           </div>
-                          <span style={{ color:"#34d399", fontWeight:700, fontSize:13 }}>NT${fmt(s.total)}</span>
+                          <div style={{ display:"flex", alignItems:"baseline", gap:10 }}>
+                            {(() => {
+                              const pos = positions.find(p => p.symbol === s.symbol);
+                              const cost = pos ? toTWD(pos.totalBuyCost, pos.market, usdTwd) : 0;
+                              const yld = cost > 0 ? (s.total / cost * 100).toFixed(2) : null;
+                              return yld ? <span style={{ color:"#f472b6", fontSize:11 }}>{yld}%</span> : null;
+                            })()}
+                            <span style={{ color:"#34d399", fontWeight:700, fontSize:13 }}>NT${fmt(s.total)}</span>
+                          </div>
                         </div>
                         <div style={{ background:"#0f1422", borderRadius:4, height:6 }}>
                           <div style={{ width:pct+"%", height:"100%", borderRadius:4, background:PALETTE[i%PALETTE.length], transition:"width 0.4s" }} />
