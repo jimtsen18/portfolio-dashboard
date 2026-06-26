@@ -122,10 +122,13 @@ const buildPositions = (trades) => {
     if (!map[sym]) map[sym] = { symbol: sym, market: t.market, shares: 0, totalBuyCost: 0, realizedGain: 0, lots: [] };
     const pos = map[sym];
     if (t.type === "buy" || !t.type) {
-      const costPerShare = (t.shares * t.price + (t.fee || 0)) / t.shares;
+      const costPerShare = t.isAdjustment && t.totalCost != null
+        ? t.totalCost / t.shares
+        : (t.shares * t.price + (t.fee || 0)) / t.shares;
+      const lotCost = t.isAdjustment && t.totalCost != null ? t.totalCost : t.shares * costPerShare;
       pos.lots.push({ shares: t.shares, price: costPerShare });
       pos.shares       += t.shares;
-      pos.totalBuyCost += t.shares * costPerShare;
+      pos.totalBuyCost += lotCost;
     } else if (t.type === "sell") {
       let remainToSell = t.shares;
       let costOfSold = 0;
@@ -657,7 +660,10 @@ const EditPositionModal = ({ position, onSave, onClose }) => {
     if (isNaN(newWac)||newWac<0) { setErr("請輸入有效數值"); return; }
     setSaving(true);
     try {
-      await onSave({ symbol:position.symbol, market:position.market, shares:newShares, wac:newWac });
+      const newTotalCost = lastEdited === "totalCost"
+        ? Math.round(parseFloat(totalCost) * 1e2) / 1e2
+        : Math.round(newWac * newShares * 1e2) / 1e2;
+      await onSave({ symbol:position.symbol, market:position.market, shares:newShares, wac:newWac, totalCost:newTotalCost });
     } catch(e) {
       console.error("onSave error:", e);
     }
@@ -871,7 +877,7 @@ export default function App() {
   // a single normalized buy trade matching the user's new shares/wac.
   // We keep sell trades intact (realized gains stay accurate); we replace the
   // buy-side cost basis only.
-  const rebasePosition = useCallback(async ({ symbol, market, shares, wac }) => {
+  const rebasePosition = useCallback(async ({ symbol, market, shares, wac, totalCost }) => {
     if (!user) return;
     const batch = writeBatch(db);
     const buysToRemove = trades.filter(t => t.symbol === symbol && (t.type === "buy" || !t.type));
@@ -886,6 +892,7 @@ export default function App() {
         date: new Date().toISOString().slice(0,10),
         shares,
         price: Math.round(wac * 1e6) / 1e6,
+        totalCost: totalCost != null ? totalCost : Math.round(wac * shares * 1e2) / 1e2,
         fee: 0,
         isAdjustment: true,
       });
