@@ -638,9 +638,8 @@ const EditPositionModal = ({ position, onSave, onClose }) => {
     if (s > 0) setWacRaw((t/s).toFixed(6));
   };
   const handleSave = async () => {
-    console.log("handleSave called");
-    const newShares = parseFloat(shares), newWac = parseFloat(wac);
-    console.log("shares:", newShares, "wac:", newWac);
+    const newShares = parseFloat(shares);
+    const newWac = Math.round(parseFloat(wac) * 1e6) / 1e6;
     if (isNaN(newShares)||newShares<0||isNaN(newWac)||newWac<0) { setErr("請輸入有效數值"); return; }
     setSaving(true);
     try {
