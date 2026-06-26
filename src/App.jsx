@@ -217,7 +217,7 @@ const TypeBadge = ({ type }) => (
 const CustomTooltip = ({ active, payload, label }) => {
   if (!active || !payload?.length) return null;
   return (
-    <div style={{ background:"#0f1422", border:"1px solid #2a3045", borderRadius:8, padding:"10px 14px", fontSize:12 }}>
+    <div style={{ background:"#e2e8f0", border:"1px solid #94a3b8", borderRadius:8, color:"#1a202c", padding:"10px 14px", fontSize:12 }}>
       <div style={{ color:"#8892a8", marginBottom:4 }}>{label}</div>
       {payload.map((p, i) => <div key={i} style={{ color:p.color||"#38bdf8" }}>{p.name}: {fmt(p.value,0)}</div>)}
     </div>
@@ -1295,7 +1295,7 @@ export default function App() {
                   <YAxis tick={{ fill:"#6b7a99", fontSize:10 }}
                     tickFormatter={v => "NT$" + (v >= 1000000 ? (v/1000000).toFixed(1)+"M" : (v/1000).toFixed(0)+"K")} />
                   <Tooltip
-                    contentStyle={{ background:"#0f1422", border:"1px solid #2a3045", borderRadius:8 }}
+                    contentStyle={{ background:"#e2e8f0", border:"1px solid #94a3b8", borderRadius:8, color:"#1a202c" }}
                     formatter={(v, name) => ["NT$" + new Intl.NumberFormat("zh-TW").format(v), name]}
                     labelFormatter={l => "日期：" + l}
                   />
@@ -1326,7 +1326,7 @@ export default function App() {
                 <Pie data={pieData} cx="50%" cy="50%" innerRadius={56} outerRadius={92} paddingAngle={2} dataKey="value">
                   {pieData.map((_,i) => <Cell key={i} fill={PALETTE[i%PALETTE.length]} />)}
                 </Pie>
-                <Tooltip formatter={v=>["NT$"+fmt(v),"市值"]} contentStyle={{ background:"#0f1422", border:"1px solid #2a3045", borderRadius:8 }} />
+                <Tooltip formatter={v=>["NT$"+fmt(v),"市值"]} contentStyle={{ background:"#e2e8f0", border:"1px solid #94a3b8", borderRadius:8, color:"#1a202c" }} />
               </PieChart>
             </ResponsiveContainer>
             <div style={{ display:"flex", flexWrap:"wrap", gap:8, marginTop:6 }}>
@@ -1348,7 +1348,7 @@ export default function App() {
                 <Pie data={marketPie} cx="50%" cy="50%" innerRadius={56} outerRadius={92} paddingAngle={4} dataKey="value">
                   <Cell fill="#38bdf8" /><Cell fill="#a78bfa" />
                 </Pie>
-                <Tooltip formatter={v=>["NT$"+fmt(v),"市值"]} contentStyle={{ background:"#0f1422", border:"1px solid #2a3045", borderRadius:8 }} />
+                <Tooltip formatter={v=>["NT$"+fmt(v),"市值"]} contentStyle={{ background:"#e2e8f0", border:"1px solid #94a3b8", borderRadius:8, color:"#1a202c" }} />
                 <Legend formatter={v => <span style={{ color:"#8892a8", fontSize:12 }}>{v}</span>} />
               </PieChart>
             </ResponsiveContainer>
@@ -1620,7 +1620,7 @@ export default function App() {
                       <Pie data={divPieData} cx="50%" cy="50%" innerRadius={56} outerRadius={92} paddingAngle={2} dataKey="value">
                         {divPieData.map((_,i) => <Cell key={i} fill={PALETTE[i%PALETTE.length]} />)}
                       </Pie>
-                      <Tooltip formatter={v=>["NT$"+fmt(v),"股息收入"]} contentStyle={{ background:"#0f1422", border:"1px solid #2a3045", borderRadius:8 }} />
+                      <Tooltip formatter={v=>["NT$"+fmt(v),"股息收入"]} contentStyle={{ background:"#e2e8f0", border:"1px solid #94a3b8", borderRadius:8, color:"#1a202c" }} />
                     </PieChart>
                   </ResponsiveContainer>
                   <div style={{ display:"flex", flexWrap:"wrap", gap:8, marginTop:6 }}>
