@@ -230,7 +230,23 @@ const CustomTooltip = ({ active, payload, label }) => {
 // ─── LOADING SCREEN ───────────────────────────────────────────────────────────
 const LoadingScreen = ({ status }) => (
   <div style={{ background:"#0b0f1a", minHeight:"100vh", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", gap:20 }}>
-    <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
+    <style>{`
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .kpi-grid-4 { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:12px; }
+  .kpi-grid-2 { display:grid; grid-template-columns:repeat(2,1fr); gap:12px; margin-bottom:24px; }
+  .chart-grid  { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+  .app-wrap    { background:#0b0f1a; min-height:100vh; color:#e2e8f0; font-family:'Inter','Segoe UI',system-ui,sans-serif; padding:24px 32px; }
+  @media(max-width:768px){
+    .kpi-grid-4 { grid-template-columns:repeat(2,1fr) !important; }
+    .kpi-grid-2 { grid-template-columns:repeat(2,1fr) !important; }
+    .chart-grid  { grid-template-columns:1fr !important; }
+    .app-wrap    { padding:16px 12px !important; }
+  }
+  @media(max-width:480px){
+    .kpi-grid-4 { grid-template-columns:1fr 1fr !important; }
+    .kpi-grid-2 { grid-template-columns:1fr 1fr !important; }
+  }
+`}</style>
     <div style={{ width:48, height:48, border:"3px solid #1e2535", borderTopColor:"#38bdf8", borderRadius:"50%", animation:"spin 0.8s linear infinite" }} />
     <div style={{ fontSize:18, fontWeight:700, background:"linear-gradient(135deg,#38bdf8,#a78bfa)", WebkitBackgroundClip:"text", WebkitTextFillColor:"transparent" }}>
       Dual-Engine Portfolio
@@ -1111,8 +1127,24 @@ export default function App() {
 
   // ─── RENDER ───────────────────────────────────────────────────────────────
   return (
-    <div style={{ background:"#0b0f1a", minHeight:"100vh", color:"#e2e8f0", fontFamily:"'Inter','Segoe UI',system-ui,sans-serif", padding:"24px 32px" }}>
-      <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
+    <div className="app-wrap">
+      <style>{`
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .kpi-grid-4 { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:12px; }
+  .kpi-grid-2 { display:grid; grid-template-columns:repeat(2,1fr); gap:12px; margin-bottom:24px; }
+  .chart-grid  { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+  .app-wrap    { background:#0b0f1a; min-height:100vh; color:#e2e8f0; font-family:'Inter','Segoe UI',system-ui,sans-serif; padding:24px 32px; }
+  @media(max-width:768px){
+    .kpi-grid-4 { grid-template-columns:repeat(2,1fr) !important; }
+    .kpi-grid-2 { grid-template-columns:repeat(2,1fr) !important; }
+    .chart-grid  { grid-template-columns:1fr !important; }
+    .app-wrap    { padding:16px 12px !important; }
+  }
+  @media(max-width:480px){
+    .kpi-grid-4 { grid-template-columns:1fr 1fr !important; }
+    .kpi-grid-2 { grid-template-columns:1fr 1fr !important; }
+  }
+`}</style>
 
       {/* ── SHEETS SYNC BANNER ── */}
       {syncStatus !== "idle" && (
@@ -1243,14 +1275,14 @@ export default function App() {
       })()}
 
       {/* ── KPI ROW 1 ── */}
-      <div style={{ display:"grid", gridTemplateColumns:"repeat(4,1fr)", gap:12, marginBottom:12 }}>
+      <div className="kpi-grid-4">
         <KPICard label="總市值（TWD）"   value={"NT$"+fmt(totalTWD)}           sub={"投入成本 NT$"+fmt(totalCost)}   color={CARD_COLORS.totalValue} />
         <KPICard label="未實現損益"       value={"NT$"+fmtSign(totalUnreal)}    sub={fmtPct(totalROI)+" vs 成本"}    color={CARD_COLORS.unrealized} />
         <KPICard label="已實現資本利得"   value={"NT$"+fmtSign(totalReal)}      sub="賣出交易累積"                    color={CARD_COLORS.realized}   />
       </div>
 
       {/* ── KPI ROW 2 ── */}
-      <div style={{ display:"grid", gridTemplateColumns:"repeat(4,1fr)", gap:12, marginBottom:24 }}>
+      <div className="kpi-grid-2" style={{ marginBottom:24 }}>
         <KPICard label={activePeriodLabel+" 股息收入"} value={"NT$"+fmt(divIncome)}   sub={"含即時換匯 ×"+usdTwd.toFixed(2)}    color={CARD_COLORS.div}        />
         <KPICard label={activePeriodLabel+" 期間資本利得"} value={"NT$"+fmtSign(periodCapGain)} sub="已實現 + 目前未實現"     color={CARD_COLORS.periodGain} />
         {/* Market split */}
@@ -1284,7 +1316,7 @@ export default function App() {
       {/* ── OVERVIEW TAB ──                                                   */}
       {/* ══════════════════════════════════════════════════════════════════════ */}
       {tab==="overview" && (
-        <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:20 }}>
+        <div className="chart-grid">
           {/* Line chart: market value vs cost over time */}
           <div style={{ background:"#1a1f2e", border:"1px solid #2a3045", borderRadius:12, padding:20, gridColumn:"1 / -1" }}>
             <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:12 }}>
