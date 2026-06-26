@@ -233,7 +233,7 @@ const LoadingScreen = ({ status }) => (
     <style>{`
   @keyframes spin{to{transform:rotate(360deg)}}
   .kpi-grid-4 { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:12px; }
-  .kpi-grid-2 { display:grid; grid-template-columns:repeat(2,1fr); gap:12px; margin-bottom:24px; }
+  .kpi-grid-2 { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:24px; }
   .chart-grid  { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
   .app-wrap    { background:#0b0f1a; min-height:100vh; color:#e2e8f0; font-family:'Inter','Segoe UI',system-ui,sans-serif; padding:24px 32px; }
   @media(max-width:768px){
@@ -1131,7 +1131,7 @@ export default function App() {
       <style>{`
   @keyframes spin{to{transform:rotate(360deg)}}
   .kpi-grid-4 { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:12px; }
-  .kpi-grid-2 { display:grid; grid-template-columns:repeat(2,1fr); gap:12px; margin-bottom:24px; }
+  .kpi-grid-2 { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:24px; }
   .chart-grid  { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
   .app-wrap    { background:#0b0f1a; min-height:100vh; color:#e2e8f0; font-family:'Inter','Segoe UI',system-ui,sans-serif; padding:24px 32px; }
   @media(max-width:768px){
