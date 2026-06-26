@@ -1240,12 +1240,10 @@ export default function App() {
         <KPICard label="總市值（TWD）"   value={"NT$"+fmt(totalTWD)}           sub={"投入成本 NT$"+fmt(totalCost)}   color={CARD_COLORS.totalValue} />
         <KPICard label="未實現損益"       value={"NT$"+fmtSign(totalUnreal)}    sub={fmtPct(totalROI)+" vs 成本"}    color={CARD_COLORS.unrealized} />
         <KPICard label="已實現資本利得"   value={"NT$"+fmtSign(totalReal)}      sub="賣出交易累積"                    color={CARD_COLORS.realized}   />
-        <KPICard label="總資本利得"       value={"NT$"+fmtSign(totalCapGainTWD)} sub="已實現 + 未實現"               color={CARD_COLORS.totalGain}  />
       </div>
 
       {/* ── KPI ROW 2 ── */}
       <div style={{ display:"grid", gridTemplateColumns:"repeat(4,1fr)", gap:12, marginBottom:24 }}>
-        <KPICard label="年化報酬 CAGR"              value={cagr.toFixed(2)+"%"}       sub={"自 "+earliest}                    color={CARD_COLORS.cagr}       />
         <KPICard label={activePeriodLabel+" 股息收入"} value={"NT$"+fmt(divIncome)}   sub={"含即時換匯 ×"+usdTwd.toFixed(2)}    color={CARD_COLORS.div}        />
         <KPICard label={activePeriodLabel+" 期間資本利得"} value={"NT$"+fmtSign(periodCapGain)} sub="已實現 + 目前未實現"     color={CARD_COLORS.periodGain} />
         {/* Market split */}
