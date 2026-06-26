@@ -946,7 +946,7 @@ export default function App() {
 
   const positions = useMemo(() => rawPositions.map(pos => {
     const price      = prices[pos.symbol] || 0;
-    const wac        = pos.shares > 0 ? pos.totalBuyCost / pos.shares : 0;
+    const wac        = pos.shares > 0 ? Math.round((pos.totalBuyCost / pos.shares) * 1e6) / 1e6 : 0;
     const marketValue = pos.shares * price;
     const unrealized  = marketValue - pos.totalBuyCost;
     const roi         = pos.totalBuyCost > 0 ? (unrealized / pos.totalBuyCost) * 100 : 0;
