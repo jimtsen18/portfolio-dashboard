@@ -1326,7 +1326,7 @@ export default function App() {
                 <Pie data={pieData} cx="50%" cy="50%" innerRadius={56} outerRadius={92} paddingAngle={2} dataKey="value">
                   {pieData.map((_,i) => <Cell key={i} fill={PALETTE[i%PALETTE.length]} />)}
                 </Pie>
-                <Tooltip formatter={v=>["NT$"+fmt(v),"市值"]} contentStyle={{ background:"#e2e8f0", border:"1px solid #94a3b8", borderRadius:8, color:"#1a202c" }} />
+                <Tooltip formatter={(v, name, props) => ["NT$"+fmt(v)]} labelFormatter={(label, payload) => payload && payload[0] ? payload[0].payload.name : label} contentStyle={{ background:"#e2e8f0", border:"1px solid #94a3b8", borderRadius:8, color:"#1a202c" }} labelStyle={{ fontWeight:700, marginBottom:4 }} />
               </PieChart>
             </ResponsiveContainer>
             <div style={{ display:"flex", flexWrap:"wrap", gap:8, marginTop:6 }}>
