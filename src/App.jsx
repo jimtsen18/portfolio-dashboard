@@ -65,6 +65,7 @@ const PALETTE = [
 ];
 
 const PERIOD_OPTIONS = [
+  { label: "1M",  days: 30   },
   { label: "6M",  days: 183  },
   { label: "YTD", days: null },
   { label: "1Y",  days: 365  },
