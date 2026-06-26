@@ -640,19 +640,24 @@ const EditPositionModal = ({ position, onSave, onClose }) => {
   const handleTotalCostBlur = () => {
     const t = parseFloat(totalCost)||0, s = parseFloat(shares)||0;
     if (s > 0) {
-      const rounded = Math.round((t / s) * 100) / 100;
-      setWacRaw(rounded.toFixed(2));
-      setTotalCostRaw((rounded * s).toFixed(2));
+      const derived = Math.round((t / s) * 1e6) / 1e6;
+      setWacRaw(derived.toFixed(6));
     }
   };
   const handleSave = async () => {
     const newShares = parseFloat(shares);
-    const newWac = Math.round(parseFloat(wac) * 1e6) / 1e6;
-    if (isNaN(newShares)||newShares<0||isNaN(newWac)||newWac<0) { setErr("請輸入有效數值"); return; }
+    if (isNaN(newShares)||newShares<0) { setErr("請輸入有效數值"); return; }
+    let newWac;
+    if (lastEdited === "totalCost") {
+      const t = parseFloat(totalCost)||0;
+      newWac = newShares > 0 ? Math.round((t / newShares) * 1e6) / 1e6 : 0;
+    } else {
+      newWac = Math.round(parseFloat(wac) * 1e6) / 1e6;
+    }
+    if (isNaN(newWac)||newWac<0) { setErr("請輸入有效數值"); return; }
     setSaving(true);
     try {
       await onSave({ symbol:position.symbol, market:position.market, shares:newShares, wac:newWac });
-      console.log("onSave completed");
     } catch(e) {
       console.error("onSave error:", e);
     }
