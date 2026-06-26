@@ -635,7 +635,7 @@ const EditPositionModal = ({ position, onSave, onClose }) => {
   const handleTotalCost = (e) => {
     const v = e.target.value; setTotalCostRaw(v); setLastEdited("totalCost");
     const t = parseFloat(v)||0, s = parseFloat(shares)||0;
-    if (s > 0) setWacRaw((t/s).toFixed(6));
+    if (s > 0) setWacRaw((Math.round((t/s) * 1e6) / 1e6).toFixed(6));
   };
   const handleSave = async () => {
     const newShares = parseFloat(shares);
@@ -872,7 +872,7 @@ export default function App() {
         market,
         date: new Date().toISOString().slice(0,10),
         shares,
-        price: wac,
+        price: Math.round(wac * 1e6) / 1e6,
         fee: 0,
         isAdjustment: true,
       });
