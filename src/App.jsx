@@ -116,16 +116,31 @@ const buildPositions = (trades) => {
   const sorted = [...trades].sort((a, b) => a.date.localeCompare(b.date));
   sorted.forEach(t => {
     const sym = t.symbol;
-    if (!map[sym]) map[sym] = { symbol: sym, market: t.market, shares: 0, totalBuyCost: 0, realizedGain: 0 };
+    if (!map[sym]) map[sym] = { symbol: sym, market: t.market, shares: 0, totalBuyCost: 0, realizedGain: 0, lots: [] };
     const pos = map[sym];
     if (t.type === "buy" || !t.type) {
+      const costPerShare = (t.shares * t.price + (t.fee || 0)) / t.shares;
+      pos.lots.push({ shares: t.shares, price: costPerShare });
       pos.shares       += t.shares;
-      pos.totalBuyCost += t.shares * t.price + (t.fee || 0);
+      pos.totalBuyCost += t.shares * costPerShare;
     } else if (t.type === "sell") {
-      const wac = pos.shares > 0 ? pos.totalBuyCost / pos.shares : 0;
-      pos.realizedGain += t.shares * t.price - (t.fee || 0) - wac * t.shares;
-      pos.totalBuyCost -= wac * t.shares;
+      let remainToSell = t.shares;
+      let costOfSold = 0;
+      while (remainToSell > 0 && pos.lots.length > 0) {
+        const lot = pos.lots[0];
+        if (lot.shares <= remainToSell) {
+          costOfSold += lot.shares * lot.price;
+          remainToSell -= lot.shares;
+          pos.lots.shift();
+        } else {
+          costOfSold += remainToSell * lot.price;
+          lot.shares -= remainToSell;
+          remainToSell = 0;
+        }
+      }
+      pos.realizedGain += t.shares * t.price - (t.fee || 0) - costOfSold;
       pos.shares       -= t.shares;
+      pos.totalBuyCost  = pos.lots.reduce((s, l) => s + l.shares * l.price, 0);
       if (pos.shares < 0)       pos.shares = 0;
       if (pos.totalBuyCost < 0) pos.totalBuyCost = 0;
     }
