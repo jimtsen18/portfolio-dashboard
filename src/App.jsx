@@ -1318,6 +1318,24 @@ export default function App() {
                 點擊「🔄 同步最新雲端報價」開始記錄市值歷史，每次同步自動儲存一筆
               </div>
             )}
+            {filteredSnapshots.length >= 2 && (() => {
+              const first = filteredSnapshots[0].marketValue;
+              const last  = filteredSnapshots[filteredSnapshots.length-1].marketValue;
+              const diff  = last - first;
+              const pct   = first > 0 ? (diff / first * 100).toFixed(2) : 0;
+              const color = diff >= 0 ? "#34d399" : "#f87171";
+              return (
+                <div style={{ marginTop:10, display:"flex", justifyContent:"flex-end", alignItems:"center", gap:16 }}>
+                  <span style={{ color:"#6b7a99", fontSize:11 }}>{filteredSnapshots[0].date} → {filteredSnapshots[filteredSnapshots.length-1].date}</span>
+                  <span style={{ color, fontWeight:700, fontSize:13 }}>
+                    {diff >= 0 ? "+" : ""}NT${fmt(Math.round(diff))}
+                  </span>
+                  <span style={{ color, fontSize:12 }}>
+                    ({diff >= 0 ? "+" : ""}{pct}%)
+                  </span>
+                </div>
+              );
+            })()}
           </div>
           {/* Donut: individual weights */}
           <div style={{ background:"#1a1f2e", border:"1px solid #2a3045", borderRadius:12, padding:20 }}>
