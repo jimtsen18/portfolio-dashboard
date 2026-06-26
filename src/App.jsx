@@ -1612,7 +1612,11 @@ export default function App() {
           <div style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:12, marginBottom:16 }}>
             <KPICard label={activePeriodLabel+" 股息總收入"} value={"NT$"+fmt(divIncome)}   sub="TWD 換算"     color="#34d399" />
             <KPICard label="股息筆數"                        value={fmt(filteredDivs.length)} sub={activePeriodLabel+" 期間"} color="#38bdf8" />
-            <KPICard label="年化股息率"                      value={totalTWD>0?(divIncome/totalTWD*100).toFixed(2)+"%":"—"} sub="股息 ÷ 總市值" color="#f472b6" />
+            <KPICard label="年化股息率"                      value={(() => {
+              const divSymbols = new Set(filteredDivs.map(d => d.symbol));
+              const divCost = positions.filter(p => divSymbols.has(p.symbol)).reduce((s, p) => s + toTWD(p.totalBuyCost, p.market, usdTwd), 0);
+              return divCost > 0 ? (divIncome / divCost * 100).toFixed(2) + "%" : "—";
+            })()} sub="股息 ÷ 持股成本" color="#f472b6" />
           </div>
 
           {/* ── Per-symbol dividend breakdown: donut + ranked list ── */}
