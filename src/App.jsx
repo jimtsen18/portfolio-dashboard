@@ -150,7 +150,7 @@ const buildPositions = (trades) => {
   });
   return Object.values(map).map(p => ({
     ...p,
-    wac: p.shares > 0 ? p.totalBuyCost / p.shares : 0,
+    wac: p.shares > 0 ? Math.round((p.totalBuyCost / p.shares) * 1e6) / 1e6 : 0,
   })).filter(p => p.shares > 0 || p.realizedGain !== 0);
 };
 
