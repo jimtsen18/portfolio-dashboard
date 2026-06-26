@@ -739,6 +739,13 @@ const EditPositionModal = ({ position, onSave, onClose }) => {
 
 export default function App() {
   // ── Auth state ───────────────────────────────────────────────────────────
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 640);
+  useEffect(() => {
+    const handler = () => setIsMobile(window.innerWidth < 640);
+    window.addEventListener("resize", handler);
+    return () => window.removeEventListener("resize", handler);
+  }, []);
+
   const [user,       setUser]       = useState(null);   // Firebase User object or null
   const [authLoading, setAuthLoading] = useState(true);  // resolving initial auth state
 
@@ -1161,13 +1168,13 @@ export default function App() {
       )}
 
       {/* ── HEADER ── */}
-      <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", marginBottom:22 }}>
+      <div style={{ display:"flex", flexDirection: isMobile ? "column" : "row", justifyContent:"space-between", alignItems: isMobile ? "stretch" : "flex-start", marginBottom:22, gap: isMobile ? 10 : 0 }}>
         <div>
-          <div style={{ fontSize:23, fontWeight:800, background:"linear-gradient(135deg,#38bdf8,#a78bfa)", WebkitBackgroundClip:"text", WebkitTextFillColor:"transparent" }}>
+          <div style={{ fontSize: isMobile ? 20 : 23, fontWeight:800, background:"linear-gradient(135deg,#38bdf8,#a78bfa)", WebkitBackgroundClip:"text", WebkitTextFillColor:"transparent" }}>
             Dual-Engine Portfolio
           </div>
-          <div style={{ display:"flex", alignItems:"center", gap:8, marginTop:3 }}>
-            <span style={{ color:"#4a5568", fontSize:12 }}>台股 × 美股 雙引擎投資追蹤</span>
+          <div style={{ display:"flex", flexWrap:"wrap", alignItems:"center", gap:6, marginTop:4 }}>
+            <span style={{ color:"#4a5568", fontSize:11 }}>台股 × 美股 雙引擎投資追蹤</span>
             {/* Firebase live badge */}
             <span style={{ background:"#052e16", border:"1px solid #34d39944", borderRadius:20, padding:"2px 10px", fontSize:10, color:"#34d399", fontWeight:600 }}>
               ⚡ Firebase 即時同步
@@ -1175,7 +1182,7 @@ export default function App() {
             {/* Live USD/TWD FX badge */}
             <button onClick={syncFxRate} title="點擊重新抓取即時匯率"
               style={{
-                display:"flex", alignItems:"center", gap:4, cursor:"pointer", border:"none",
+                display:"flex", alignItems:"center", gap:4, cursor:"pointer",
                 borderRadius:20, padding:"2px 10px", fontSize:10, fontWeight:600,
                 background: fxStatus==="error" ? "#2d1515" : "#0d1f35",
                 color: fxStatus==="error" ? "#f87171" : fxStatus==="loading" ? "#a5b4fc" : "#38bdf8",
@@ -1183,18 +1190,22 @@ export default function App() {
               }}>
               {fxStatus==="loading" ? "⏳ 更新匯率中…" : fxStatus==="error" ? "⚠️ 匯率改用備援值" : `💱 USD/TWD ${usdTwd.toFixed(3)}`}
             </button>
-            {lastSynced && syncStatus==="idle" && (
-              <span style={{ color:"#2a3a55", fontSize:11 }}>· 報價更新 {lastSynced}</span>
-            )}
-            {fxUpdated && fxStatus==="idle" && (
-              <span style={{ color:"#2a3a55", fontSize:11 }}>· 匯率更新 {fxUpdated}</span>
-            )}
           </div>
+          {(lastSynced || fxUpdated) && (
+            <div style={{ display:"flex", flexWrap:"wrap", gap:8, marginTop:3 }}>
+              {lastSynced && syncStatus==="idle" && (
+                <span style={{ color:"#2a3a55", fontSize:10 }}>· 報價更新 {lastSynced}</span>
+              )}
+              {fxUpdated && fxStatus==="idle" && (
+                <span style={{ color:"#2a3a55", fontSize:10 }}>· 匯率更新 {fxUpdated}</span>
+              )}
+            </div>
+          )}
         </div>
 
-        <div style={{ display:"flex", gap:10, alignItems:"center", flexWrap:"wrap", justifyContent:"flex-end" }}>
+        <div style={{ display:"flex", flexDirection: isMobile ? "column" : "row", gap: isMobile ? 6 : 10, alignItems: isMobile ? "stretch" : "center", flexWrap: isMobile ? "nowrap" : "wrap", justifyContent:"flex-end" }}>
           {/* Period buttons */}
-          <div style={{ display:"flex", background:"#1a1f2e", borderRadius:10, border:"1px solid #2a3045", padding:3, gap:2 }}>
+          <div style={{ display:"flex", background:"#1a1f2e", borderRadius:10, border:"1px solid #2a3045", padding:3, gap:2, width: isMobile ? "100%" : "auto", justifyContent: isMobile ? "space-between" : "flex-start" }}>
             {PERIOD_OPTIONS.map(p => {
               const active = !yearFilter && period.label===p.label;
               return (
@@ -1208,12 +1219,12 @@ export default function App() {
           </div>
 
           {/* Year dropdown */}
-          <div style={{ position:"relative" }}>
+          <div style={{ position:"relative", width: isMobile ? "100%" : "auto" }}>
             <select value={yearFilter||""} onChange={e => setYearFilter(e.target.value||null)}
               style={{ background:yearFilter?"#1a2e4a":"#1a1f2e", border:`1px solid ${yearFilter?"#38bdf8":"#2a3045"}`,
                 borderRadius:8, color:yearFilter?"#38bdf8":"#6b7a99",
                 padding:"6px 30px 6px 12px", fontSize:12, fontWeight:600,
-                cursor:"pointer", appearance:"none", WebkitAppearance:"none", outline:"none", minWidth:110 }}>
+                cursor:"pointer", appearance:"none", WebkitAppearance:"none", outline:"none", width: isMobile ? "100%" : "auto", minWidth: isMobile ? "unset" : 110 }}>
               <option value="">特定年份 ▾</option>
               {availableYears.map(y => <option key={y} value={y}>{y} 年</option>)}
             </select>
