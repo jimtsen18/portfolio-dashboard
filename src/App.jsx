@@ -11,6 +11,7 @@ import {
 
 // ─── FIREBASE ────────────────────────────────────────────────────────────────
 import { initializeApp }                            from "firebase/app";
+import { getAnalytics, logEvent }                    from "firebase/analytics";
 import {
   getFirestore, collection, doc,
   onSnapshot, setDoc, deleteDoc, writeBatch, getDocs
@@ -33,9 +34,10 @@ const firebaseConfig = {
   measurementId:     "G-P6YC4DR214",
 };
 
-const fbApp  = initializeApp(firebaseConfig);
-const db     = getFirestore(fbApp);
-const auth   = getAuth(fbApp);
+const fbApp     = initializeApp(firebaseConfig);
+const db        = getFirestore(fbApp);
+const auth      = getAuth(fbApp);
+const analytics = getAnalytics(fbApp);
 const googleProvider = new GoogleAuthProvider();
 
 // Firestore collection names — now nested under users/{uid}/...
@@ -828,6 +830,7 @@ export default function App() {
   const addTrade = useCallback(async (t) => {
     if (!user) return;
     await setDoc(userDoc(user.uid, COL_TRADES, t.id), t);
+    logEvent(analytics, "add_stock", { symbol: t.symbol });
   }, [user]);
 
   const updateTrade = useCallback(async (t) => {
@@ -837,14 +840,17 @@ export default function App() {
 
   const saveEditTrade = useCallback(async (t) => {
     await updateTrade(t);
+    logEvent(analytics, "edit_stock", { symbol: t.symbol });
     setEditingTrade(null);
   }, [updateTrade]);
 
   const deleteEditTrade = useCallback(async (id) => {
     if (!user) return;
+    const trade = trades.find(t => t.id === id);
     await deleteDoc(userDoc(user.uid, COL_TRADES, id));
+    if (trade) logEvent(analytics, "delete_stock", { symbol: trade.symbol });
     setEditingTrade(null);
-  }, [user]);
+  }, [user, trades]);
 
   const delTrade = useCallback(async (id) => {
     if (!user) return;
