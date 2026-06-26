@@ -635,6 +635,10 @@ const EditPositionModal = ({ position, onSave, onClose }) => {
   const handleTotalCost = (e) => {
     const v = e.target.value; setTotalCostRaw(v); setLastEdited("totalCost");
     const t = parseFloat(v)||0, s = parseFloat(shares)||0;
+    if (s > 0) setWacRaw((Math.round((t / s) * 100) / 100).toFixed(2));
+  };
+  const handleTotalCostBlur = () => {
+    const t = parseFloat(totalCost)||0, s = parseFloat(shares)||0;
     if (s > 0) {
       const rounded = Math.round((t / s) * 100) / 100;
       setWacRaw(rounded.toFixed(2));
@@ -677,7 +681,7 @@ const EditPositionModal = ({ position, onSave, onClose }) => {
           </div>
           <div>
             <div style={LBL}>持倉總成本（{cur}）</div>
-            <input type="number" step="0.01" value={totalCost} onChange={handleTotalCost}
+            <input type="number" step="0.01" value={totalCost} onChange={handleTotalCost} onBlur={handleTotalCostBlur}
               style={{ ...INP, borderColor: lastEdited==="totalCost"?"#34d399":"#2a3045" }} />
           </div>
         </div>
