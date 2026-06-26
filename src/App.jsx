@@ -762,7 +762,6 @@ export default function App() {
   // ── UI state ─────────────────────────────────────────────────────────────
   const [period,     setPeriod]     = useState(PERIOD_OPTIONS[2]);
   const [yearFilter, setYearFilter] = useState(null);
-  const [showModal,  setShowModal]  = useState(false);
   const [tab,        setTab]        = useState("overview");
   const [posSort,    setPosSort]    = useState({ col:"valueInTWD", dir:"desc" });
   const [editingTrade,    setEditingTrade]    = useState(null); // trade object or null
@@ -1246,10 +1245,6 @@ export default function App() {
             {syncTheme.text}
           </button>
 
-          <button onClick={() => setShowModal(true)}
-            style={{ background:"#151b2a", border:"1px solid #2a3045", borderRadius:8, color:"#6b7a99", padding:"7px 14px", fontWeight:600, cursor:"pointer", fontSize:12 }}>
-            手動覆寫
-          </button>
 
           {/* User badge + logout */}
           <div style={{ display:"flex", alignItems:"center", gap:8, background:"#151b2a", border:"1px solid #2a3045", borderRadius:8, padding:"5px 12px" }}>
@@ -1829,8 +1824,7 @@ export default function App() {
         </div>
       )}
 
-      {/* ── PRICE MODAL ── */}
-      {showModal && <PriceModal prices={prices} onClose={() => setShowModal(false)} onSave={savePrices} />}
+
 
       {/* ── EDIT TRADE MODAL ── */}
       {editingTrade && (
