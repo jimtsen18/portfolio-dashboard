@@ -237,8 +237,13 @@ const LoadingScreen = ({ status }) => (
   .chart-grid  { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
   .app-wrap    { background:#0b0f1a; min-height:100vh; color:#e2e8f0; font-family:'Inter','Segoe UI',system-ui,sans-serif; padding:24px 32px; }
   @media(max-width:768px){
-    .kpi-grid-4 { grid-template-columns:1fr !important; gap:8px !important; margin-bottom:8px !important; }
-    .kpi-grid-2 { grid-template-columns:1fr !important; gap:8px !important; margin-bottom:16px !important; }
+    .kpi-all    { display:flex !important; flex-direction:column !important; gap:8px !important; margin-bottom:16px !important; }
+    .kpi-order-1 { order:1; }
+    .kpi-order-2 { order:2; }
+    .kpi-order-3 { order:3; }
+    .kpi-order-4 { order:4; }
+    .kpi-order-5 { order:5; }
+    .kpi-order-6 { order:6; }
     .chart-grid  { grid-template-columns:1fr !important; }
     .app-wrap    { padding:16px 12px !important; }
   }
@@ -1131,8 +1136,13 @@ export default function App() {
   .chart-grid  { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
   .app-wrap    { background:#0b0f1a; min-height:100vh; color:#e2e8f0; font-family:'Inter','Segoe UI',system-ui,sans-serif; padding:24px 32px; }
   @media(max-width:768px){
-    .kpi-grid-4 { grid-template-columns:1fr !important; gap:8px !important; margin-bottom:8px !important; }
-    .kpi-grid-2 { grid-template-columns:1fr !important; gap:8px !important; margin-bottom:16px !important; }
+    .kpi-all    { display:flex !important; flex-direction:column !important; gap:8px !important; margin-bottom:16px !important; }
+    .kpi-order-1 { order:1; }
+    .kpi-order-2 { order:2; }
+    .kpi-order-3 { order:3; }
+    .kpi-order-4 { order:4; }
+    .kpi-order-5 { order:5; }
+    .kpi-order-6 { order:6; }
     .chart-grid  { grid-template-columns:1fr !important; }
     .app-wrap    { padding:16px 12px !important; }
   }
@@ -1267,16 +1277,13 @@ export default function App() {
       })()}
 
       {/* ── KPI ROW 1 ── */}
-      <div className="kpi-grid-4">
-        <KPICard label="總市值（TWD）"   value={"NT$"+fmt(totalTWD)}           sub={"投入成本 NT$"+fmt(totalCost)}   color={CARD_COLORS.totalValue} />
-        <KPICard label="未實現損益"       value={"NT$"+fmtSign(totalUnreal)}    sub={fmtPct(totalROI)+" vs 成本"}    color={CARD_COLORS.unrealized} />
-        <KPICard label="已實現資本利得"   value={"NT$"+fmtSign(totalReal)}      sub="賣出交易累積"                    color={CARD_COLORS.realized}   />
-      </div>
-
-      {/* ── KPI ROW 2 ── */}
-      <div className="kpi-grid-2" style={{ marginBottom:24 }}>
-        <KPICard label={activePeriodLabel+" 股息收入"} value={"NT$"+fmt(divIncome)}   sub={"含即時換匯 ×"+usdTwd.toFixed(2)}    color={CARD_COLORS.div}        />
-        <KPICard label={activePeriodLabel+" 期間資本利得"} value={"NT$"+fmtSign(periodCapGain)} sub="已實現 + 目前未實現"     color={CARD_COLORS.periodGain} />
+      <div className="kpi-all" style={{ display:"grid", gridTemplateColumns:"repeat(4,1fr)", gap:12, marginBottom:24 }}>
+        <div className="kpi-order-1"><KPICard label="總市值（TWD）"   value={"NT$"+fmt(totalTWD)}           sub={"投入成本 NT$"+fmt(totalCost)}   color={CARD_COLORS.totalValue} /></div>
+        <div className="kpi-order-2"><KPICard label="未實現損益"       value={"NT$"+fmtSign(totalUnreal)}    sub={fmtPct(totalROI)+" vs 成本"}    color={CARD_COLORS.unrealized} /></div>
+        <div className="kpi-order-3"><KPICard label={activePeriodLabel+" 股息收入"} value={"NT$"+fmt(divIncome)}   sub={"含即時換匯 ×"+usdTwd.toFixed(2)}    color={CARD_COLORS.div}        /></div>
+        <div className="kpi-order-4"><KPICard label="已實現資本利得"   value={"NT$"+fmtSign(totalReal)}      sub="賣出交易累積"                    color={CARD_COLORS.realized}   /></div>
+        <div className="kpi-order-5"><KPICard label={activePeriodLabel+" 期間資本利得"} value={"NT$"+fmtSign(periodCapGain)} sub="已實現 + 目前未實現"     color={CARD_COLORS.periodGain} /></div>
+        <div className="kpi-order-6">
         {/* Market split */}
         <div style={{ background:"#1a1f2e", border:"1px solid #2a3045", borderRadius:12, padding:"16px 20px" }}>
           <div style={{ fontSize:11, color:"#6b7a99", textTransform:"uppercase", letterSpacing:"0.08em", marginBottom:10 }}>市場分配</div>
@@ -1294,6 +1301,7 @@ export default function App() {
               </div>
             );
           })}
+        </div>
         </div>
       </div>
 
