@@ -883,16 +883,6 @@ export default function App() {
   }, [trades, user]);
 
   // Save prices to Firestore (batch)
-  const savePrices = useCallback(async (newPrices) => {
-    if (!user) return;
-    const batch = writeBatch(db);
-    Object.entries(newPrices).forEach(([sym, price]) => {
-      batch.set(userDoc(user.uid, COL_PRICES, sym), { symbol: sym, price });
-    });
-    await batch.commit();
-    setShowModal(false);
-  }, [user]);
-
   // ── Google Sheets sync ────────────────────────────────────────────────────
   const allSymbols = useMemo(() => [...new Set(trades.map(t => t.symbol))], [trades]);
 
