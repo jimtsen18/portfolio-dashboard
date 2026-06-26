@@ -237,14 +237,10 @@ const LoadingScreen = ({ status }) => (
   .chart-grid  { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
   .app-wrap    { background:#0b0f1a; min-height:100vh; color:#e2e8f0; font-family:'Inter','Segoe UI',system-ui,sans-serif; padding:24px 32px; }
   @media(max-width:768px){
-    .kpi-grid-4 { grid-template-columns:repeat(2,1fr) !important; }
-    .kpi-grid-2 { grid-template-columns:repeat(2,1fr) !important; }
+    .kpi-grid-4 { grid-template-columns:1fr !important; gap:8px !important; margin-bottom:8px !important; }
+    .kpi-grid-2 { grid-template-columns:1fr !important; gap:8px !important; margin-bottom:16px !important; }
     .chart-grid  { grid-template-columns:1fr !important; }
     .app-wrap    { padding:16px 12px !important; }
-  }
-  @media(max-width:480px){
-    .kpi-grid-4 { grid-template-columns:1fr 1fr !important; }
-    .kpi-grid-2 { grid-template-columns:1fr 1fr !important; }
   }
 `}</style>
     <div style={{ width:48, height:48, border:"3px solid #1e2535", borderTopColor:"#38bdf8", borderRadius:"50%", animation:"spin 0.8s linear infinite" }} />
@@ -1135,14 +1131,10 @@ export default function App() {
   .chart-grid  { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
   .app-wrap    { background:#0b0f1a; min-height:100vh; color:#e2e8f0; font-family:'Inter','Segoe UI',system-ui,sans-serif; padding:24px 32px; }
   @media(max-width:768px){
-    .kpi-grid-4 { grid-template-columns:repeat(2,1fr) !important; }
-    .kpi-grid-2 { grid-template-columns:repeat(2,1fr) !important; }
+    .kpi-grid-4 { grid-template-columns:1fr !important; gap:8px !important; margin-bottom:8px !important; }
+    .kpi-grid-2 { grid-template-columns:1fr !important; gap:8px !important; margin-bottom:16px !important; }
     .chart-grid  { grid-template-columns:1fr !important; }
     .app-wrap    { padding:16px 12px !important; }
-  }
-  @media(max-width:480px){
-    .kpi-grid-4 { grid-template-columns:1fr 1fr !important; }
-    .kpi-grid-2 { grid-template-columns:1fr 1fr !important; }
   }
 `}</style>
 
