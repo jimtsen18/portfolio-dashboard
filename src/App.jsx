@@ -1666,7 +1666,7 @@ export default function App() {
           </div>
 
           {/* ── Per-symbol dividend breakdown: donut + ranked list ── */}
-          <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:20, marginBottom:20 }}>
+          <div style={{ display:"grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap:20, marginBottom:20 }}>
             {/* Donut chart */}
             <div style={{ background:"#1a1f2e", border:"1px solid #2a3045", borderRadius:12, padding:20 }}>
               <div style={{ color:"#8892a8", fontSize:12, marginBottom:12 }}>
