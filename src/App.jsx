@@ -748,6 +748,9 @@ export default function App() {
   const [tab,        setTab]        = useState("overview");
   const [posSort,    setPosSort]    = useState({ col:"valueInTWD", dir:"desc" });
   const [editingTrade,    setEditingTrade]    = useState(null); // trade object or null
+  const [tradeFilterSymbol, setTradeFilterSymbol] = useState("");
+  const [tradeSortCol,      setTradeSortCol]      = useState("date");
+  const [tradeSortDir,      setTradeSortDir]      = useState("desc");
   const [editingPosition, setEditingPosition] = useState(null); // position object or null
   const [syncStatus, setSyncStatus] = useState("idle");
   const [syncMsg,    setSyncMsg]    = useState("");
@@ -1582,6 +1585,41 @@ export default function App() {
             <KPICard label={activePeriodLabel+" 期間已實現"} value={"NT$"+fmtSign(realizedInPeriod)} sub="期間賣出交易"   color={realizedInPeriod>=0?"#34d399":"#f87171"} />
             <KPICard label="賣出交易筆數"             value={fmt(trades.filter(t=>t.type==="sell").length)} sub="筆賣出" color="#38bdf8" />
           </div>
+          {/* Filter + Sort controls */}
+          <div style={{ display:"flex", flexWrap:"wrap", gap:8, marginBottom:10, alignItems:"center" }}>
+            <select value={tradeFilterSymbol} onChange={e => setTradeFilterSymbol(e.target.value)}
+              style={{ background:"#1a1f2e", border:`1px solid ${tradeFilterSymbol?"#38bdf8":"#2a3045"}`,
+                borderRadius:8, color:tradeFilterSymbol?"#38bdf8":"#6b7a99", padding:"6px 12px",
+                fontSize:12, fontWeight:600, cursor:"pointer", outline:"none" }}>
+              <option value="">全部標的</option>
+              {[...new Set(trades.map(t => t.symbol))].sort().map(sym => (
+                <option key={sym} value={sym}>{sym}</option>
+              ))}
+            </select>
+            {tradeFilterSymbol && (
+              <button onClick={() => setTradeFilterSymbol("")}
+                style={{ background:"none", border:"none", color:"#38bdf8", cursor:"pointer", fontSize:13, padding:"0 4px" }}>×</button>
+            )}
+            <div style={{ display:"flex", background:"#1a1f2e", border:"1px solid #2a3045", borderRadius:8, overflow:"hidden" }}>
+              {[{col:"date",label:"📅 時間"},{col:"symbol",label:"🔤 標的"}].map(({col,label}) => {
+                const active = tradeSortCol===col;
+                return (
+                  <button key={col} onClick={() => {
+                    if (tradeSortCol===col) setTradeSortDir(d => d==="asc"?"desc":"asc");
+                    else { setTradeSortCol(col); setTradeSortDir("desc"); }
+                  }} style={{ background:active?"#1e3a5f":"transparent", border:"none",
+                    color:active?"#38bdf8":"#6b7a99", padding:"6px 14px", fontSize:12,
+                    fontWeight:600, cursor:"pointer", whiteSpace:"nowrap" }}>
+                    {label} {active ? (tradeSortDir==="desc"?"↓":"↑") : ""}
+                  </button>
+                );
+              })}
+            </div>
+            <span style={{ color:"#4a5568", fontSize:11 }}>
+              共 {trades.filter(t => !tradeFilterSymbol || t.symbol===tradeFilterSymbol).length} 筆
+            </span>
+          </div>
+
           <div style={{ background:"#1a1f2e", border:"1px solid #2a3045", borderRadius:12, overflow:"auto" }}>
             <table style={{ width:"100%", borderCollapse:"collapse", fontSize:13 }}>
               <thead>
@@ -1594,7 +1632,14 @@ export default function App() {
                 </tr>
               </thead>
               <tbody>
-                {[...trades].sort((a,b) => b.date.localeCompare(a.date)).map((t, i) => {
+                {[...trades]
+                  .filter(t => !tradeFilterSymbol || t.symbol===tradeFilterSymbol)
+                  .sort((a,b) => {
+                    const dir = tradeSortDir==="asc" ? 1 : -1;
+                    if (tradeSortCol==="symbol") return a.symbol.localeCompare(b.symbol) * dir;
+                    return a.date.localeCompare(b.date) * dir;
+                  })
+                  .map((t, i) => {
                   const pos = positions.find(p => p.symbol===t.symbol);
                   const wac = pos ? pos.wac : 0;
                   const realized = t.type==="sell"
