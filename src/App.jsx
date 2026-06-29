@@ -1766,7 +1766,7 @@ export default function App() {
               <tbody>
                 {[...dividends].sort((a,b) => b.date.localeCompare(a.date)).map((d, i) => (
                   <tr key={d.id} style={{ borderTop:"1px solid #1e2535", background:i%2===0?"transparent":"#0f1422" }}>
-                    <td style={{ padding:"10px 14px", color:"#8892a8" }}>{d.date}</td>
+                    <td style={{ padding:"10px 14px", color:"#8892a8", whiteSpace:"nowrap" }}>{d.date}</td>
                     <td style={{ padding:"10px 14px", fontWeight:700, color:"#e2e8f0" }}>{d.symbol}</td>
                     <td style={{ padding:"10px 14px" }}><Badge color={d.market==="TW"?"#38bdf8":"#a78bfa"}>{d.market==="TW"?"台股":"美股"}</Badge></td>
                     <td style={{ padding:"10px 14px", textAlign:"right", color:"#e2e8f0" }}>{d.market==="TW"?"NT$":"$"}{(d.perShare||0).toFixed(2)}</td>
