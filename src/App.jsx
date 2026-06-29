@@ -1624,7 +1624,7 @@ export default function App() {
             <table style={{ width:"100%", borderCollapse:"collapse", fontSize:13 }}>
               <thead>
                 <tr style={{ background:"#0f1422" }}>
-                  {["類型","代號","市場","日期","股數","單價","費用/稅","金額","實現利得","操作"].map(h => (
+                  {["類型","代號","市場","日期","股數","單價","費用/稅","金額","損益／報酬率","操作"].map(h => (
                     <th key={h} style={{ padding:"12px 14px", color:"#6b7a99", fontWeight:600,
                       textAlign:["類型","代號","市場","日期"].includes(h)?"left":"right",
                       whiteSpace:"nowrap", fontSize:11 }}>{h}</th>
@@ -1642,8 +1642,19 @@ export default function App() {
                   .map((t, i) => {
                   const pos = positions.find(p => p.symbol===t.symbol);
                   const wac = pos ? pos.wac : 0;
+                  const currentPrice = prices[t.symbol] || 0;
+                  const buyCost = t.shares * t.price + (t.fee||0);
+                  const unrealized = t.type==="buy"
+                    ? toTWD(t.shares * currentPrice - buyCost, t.market, usdTwd)
+                    : null;
+                  const unrealizedRoi = t.type==="buy" && buyCost > 0
+                    ? (t.shares * currentPrice - buyCost) / buyCost * 100
+                    : null;
                   const realized = t.type==="sell"
                     ? toTWD(t.shares*t.price - (t.fee||0) - wac*t.shares, t.market, usdTwd)
+                    : null;
+                  const realizedRoi = t.type==="sell" && wac > 0
+                    ? (t.price - (t.fee||0)/t.shares - wac) / wac * 100
                     : null;
                   return (
                     <tr key={t.id} style={{ borderTop:"1px solid #1e2535", background:i%2===0?"transparent":"#0f1422" }}>
@@ -1658,9 +1669,27 @@ export default function App() {
                         {t.market==="TW"?"NT$":"$"}{fmt(t.type==="sell"?t.shares*t.price-(t.fee||0):t.shares*t.price+(t.fee||0),2)}
                       </td>
                       <td style={{ padding:"10px 14px", textAlign:"right" }}>
-                        {realized!==null
-                          ? <span style={{ color:realized>=0?"#a78bfa":"#f87171", fontWeight:700 }}>NT${fmtSign(realized)}</span>
-                          : <span style={{ color:"#2a3045" }}>—</span>}
+                        {t.type==="buy" && unrealized!==null && currentPrice>0 ? (
+                          <div>
+                            <div style={{ color:unrealized>=0?"#34d399":"#f87171", fontWeight:700, whiteSpace:"nowrap" }}>
+                              NT${fmtSign(Math.round(unrealized))}
+                            </div>
+                            <div style={{ color:unrealizedRoi>=0?"#34d399":"#f87171", fontSize:11, whiteSpace:"nowrap" }}>
+                              {unrealizedRoi>=0?"+":""}{unrealizedRoi.toFixed(2)}%
+                            </div>
+                          </div>
+                        ) : t.type==="sell" && realized!==null ? (
+                          <div>
+                            <div style={{ color:realized>=0?"#a78bfa":"#f87171", fontWeight:700, whiteSpace:"nowrap" }}>
+                              NT${fmtSign(Math.round(realized))}
+                            </div>
+                            <div style={{ color:realizedRoi>=0?"#a78bfa":"#f87171", fontSize:11, whiteSpace:"nowrap" }}>
+                              {realizedRoi>=0?"+":""}{realizedRoi.toFixed(2)}%
+                            </div>
+                          </div>
+                        ) : (
+                          <span style={{ color:"#2a3045" }}>—</span>
+                        )}
                       </td>
                       <td style={{ padding:"10px 14px", textAlign:"right" }}>
                         <div style={{ display:"flex", gap:6, justifyContent:"flex-end" }}>
