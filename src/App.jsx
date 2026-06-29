@@ -1577,7 +1577,7 @@ export default function App() {
       {/* ══════════════════════════════════════════════════════════════════════ */}
       {tab==="trades" && (
         <div>
-          <div style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:12, marginBottom:16 }}>
+          <div style={{ display:"grid", gridTemplateColumns: isMobile ? "1fr" : "repeat(3,1fr)", gap:12, marginBottom:16 }}>
             <KPICard label="已實現資本利得（全部）"    value={"NT$"+fmtSign(totalReal)}        sub="所有賣出交易合計" color={totalReal>=0?"#a78bfa":"#f87171"} />
             <KPICard label={activePeriodLabel+" 期間已實現"} value={"NT$"+fmtSign(realizedInPeriod)} sub="期間賣出交易"   color={realizedInPeriod>=0?"#34d399":"#f87171"} />
             <KPICard label="賣出交易筆數"             value={fmt(trades.filter(t=>t.type==="sell").length)} sub="筆賣出" color="#38bdf8" />
@@ -1605,7 +1605,7 @@ export default function App() {
                       <td style={{ padding:"10px 14px" }}><TypeBadge type={t.type||"buy"} /></td>
                       <td style={{ padding:"10px 14px", fontWeight:700, color:"#e2e8f0" }}>{t.symbol}</td>
                       <td style={{ padding:"10px 14px" }}><Badge color={t.market==="TW"?"#38bdf8":"#a78bfa"}>{t.market==="TW"?"台股":"美股"}</Badge></td>
-                      <td style={{ padding:"10px 14px", color:"#8892a8" }}>{t.date}</td>
+                      <td style={{ padding:"10px 14px", color:"#8892a8", whiteSpace:"nowrap" }}>{t.date}</td>
                       <td style={{ padding:"10px 14px", textAlign:"right", color:"#e2e8f0" }}>{fmt(t.shares, t.market==="US"?5:0)}</td>
                       <td style={{ padding:"10px 14px", textAlign:"right", color:"#e2e8f0" }}>{t.market==="TW"?"NT$":"$"}{t.price.toFixed(2)}</td>
                       <td style={{ padding:"10px 14px", textAlign:"right", color:"#6b7a99" }}>{fmt(t.fee||0,2)}</td>
@@ -1655,7 +1655,7 @@ export default function App() {
 
         return (
         <div>
-          <div style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:12, marginBottom:16 }}>
+          <div style={{ display:"grid", gridTemplateColumns: isMobile ? "1fr" : "repeat(3,1fr)", gap:12, marginBottom:16 }}>
             <KPICard label={activePeriodLabel+" 股息總收入"} value={"NT$"+fmt(divIncome)}   sub="TWD 換算"     color="#34d399" />
             <KPICard label="股息筆數"                        value={fmt(filteredDivs.length)} sub={activePeriodLabel+" 期間"} color="#38bdf8" />
             <KPICard label="年化股息率"                      value={(() => {
