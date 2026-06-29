@@ -211,7 +211,7 @@ const KPICard = ({ label, value, sub, color="#38bdf8" }) => (
 );
 
 const Badge = ({ children, color }) => (
-  <span style={{ background:color+"22", color, border:`1px solid ${color}44`, borderRadius:6, padding:"2px 8px", fontSize:11, fontWeight:600 }}>
+  <span style={{ background:color+"22", color, border:`1px solid ${color}44`, borderRadius:6, padding:"2px 8px", fontSize:11, fontWeight:600, whiteSpace:"nowrap" }}>
     {children}
   </span>
 );
