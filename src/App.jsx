@@ -1261,7 +1261,7 @@ export default function App() {
 
       {/* ── KPI ROW 1 ── */}
       <div className="kpi-all" style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:12, marginBottom:24 }}>
-        <div className="kpi-order-1" style={{ height:"100%" }}><KPICard label="總市值（TWD）"   value={"NT$"+fmt(totalTWD)}           sub={"投入成本 NT$"+fmt(totalCost)}   color={CARD_COLORS.totalValue} /></div>
+        <div className="kpi-order-1" style={{ height:"100%" }}><KPICard label="總市值（TWD）"   value={"NT$"+fmt(totalTWD)}           sub={`≈ $${fmt(totalTWD/usdTwd)} ・投入成本 NT$${fmt(totalCost)}`}   color={CARD_COLORS.totalValue} /></div>
         <div className="kpi-order-2" style={{ height:"100%" }}><KPICard label="未實現損益"       value={"NT$"+fmtSign(totalUnreal)}    sub={fmtPct(totalROI)+" vs 成本"}    color={CARD_COLORS.unrealized} /></div>
         <div className="kpi-order-3" style={{ height:"100%" }}><KPICard label={activePeriodLabel+" 股息收入"} value={"NT$"+fmt(divIncome)}   sub={"含即時換匯 ×"+usdTwd.toFixed(2)}    color={CARD_COLORS.div}        /></div>
         <div className="kpi-order-4" style={{ height:"100%" }}><KPICard label="已實現資本利得"   value={"NT$"+fmtSign(totalReal)}      sub="賣出交易累積"                    color={CARD_COLORS.realized}   /></div>
@@ -1501,6 +1501,7 @@ export default function App() {
                     <th onClick={() => handleSort("totalBuyCost")}style={{ ...thHover("totalBuyCost"),textAlign:"right" }}>持倉成本 <Arrow col="totalBuyCost" /></th>
                     <th onClick={() => handleSort("price")}       style={{ ...thHover("price"),       textAlign:"right" }}>現價 <Arrow col="price" /></th>
                     <th onClick={() => handleSort("valueInTWD")}  style={{ ...thHover("valueInTWD"),  textAlign:"right" }}>市值 TWD <Arrow col="valueInTWD" /></th>
+                    <th onClick={() => handleSort("valueInTWD")}  style={{ ...thHover("valueInTWD"),  textAlign:"right" }}>市值 USD <Arrow col="valueInTWD" /></th>
                     <th onClick={() => handleSort("unrealTWD")}   style={{ ...thHover("unrealTWD"),   textAlign:"right" }}>未實現損益 <Arrow col="unrealTWD" /></th>
                     <th onClick={() => handleSort("realTWD")}     style={{ ...thHover("realTWD"),     textAlign:"right" }}>已實現利得 <Arrow col="realTWD" /></th>
                     <th onClick={() => handleSort("roi")}         style={{ ...thHover("roi"),         textAlign:"right" }}>ROI <Arrow col="roi" /></th>
@@ -1512,14 +1513,14 @@ export default function App() {
                     <>
                       {showSep(sortedPositions, i) && (
                         <tr key={"sep-"+i}>
-                          <td colSpan={11} style={{ padding:"6px 14px", background:"#0d1424", borderTop:"1px solid #2a3045", borderBottom:"1px solid #2a3045" }}>
+                          <td colSpan={12} style={{ padding:"6px 14px", background:"#0d1424", borderTop:"1px solid #2a3045", borderBottom:"1px solid #2a3045" }}>
                             <span style={{ color:"#a78bfa", fontSize:11, fontWeight:700, letterSpacing:"0.1em" }}>🇺🇸 美股</span>
                           </td>
                         </tr>
                       )}
                       {posSort.col==="category" && i===0 && (
                         <tr key="sep-tw">
-                          <td colSpan={11} style={{ padding:"6px 14px", background:"#0d1424", borderBottom:"1px solid #2a3045" }}>
+                          <td colSpan={12} style={{ padding:"6px 14px", background:"#0d1424", borderBottom:"1px solid #2a3045" }}>
                             <span style={{ color:"#38bdf8", fontSize:11, fontWeight:700, letterSpacing:"0.1em" }}>🇹🇼 台股</span>
                           </td>
                         </tr>
@@ -1542,9 +1543,10 @@ export default function App() {
                             <span style={{ color:"#e2e8f0", fontWeight:700 }}>NT${fmt(p.valueInTWD)}</span>
                             <div style={{ width:60, height:3, background:"#1e2535", borderRadius:2 }}>
                               <div style={{ width:(totalTWD>0?Math.min(p.valueInTWD/totalTWD*100,100):0)+"%",
-                                height:"100%", background:p.market==="TW"?"#38bdf8":"#a78bfa", borderRadius:2, transition:"width 0.4s" }} />
-                            </div>
-                          </div>
+                                height:"100%", background:p.market==="TW"?"#38bdf8":"#a78bfa", borderRadius:2, transition:"width 0.4s" }} /></div></div>
+                        </td>
+                        <td style={{ padding:"11px 14px", textAlign:"right", color:"#8892a8" }}>
+                          ${fmt(p.valueInTWD/usdTwd,2)}
                         </td>
                         <td style={{ padding:"11px 14px", textAlign:"right", color:p.unrealized>=0?"#34d399":"#f87171", fontWeight:700 }}>
                           NT${fmtSign(p.unrealTWD)}
