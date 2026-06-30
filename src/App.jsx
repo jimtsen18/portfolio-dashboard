@@ -1399,10 +1399,28 @@ export default function App() {
                 <Pie data={marketPie} cx="50%" cy="50%" innerRadius={56} outerRadius={92} paddingAngle={4} dataKey="value">
                   <Cell fill="#38bdf8" /><Cell fill="#a78bfa" />
                 </Pie>
-                <Tooltip formatter={v=>["NT$"+fmt(v),"市值"]} contentStyle={{ background:"#e2e8f0", border:"1px solid #94a3b8", borderRadius:8, color:"#1a202c" }} />
+                <Tooltip content={({ payload }) => {
+                  if (!payload || !payload[0]) return null;
+                  const d = payload[0].payload;
+                  return (
+                    <div style={{ background:"#e2e8f0", border:"1px solid #94a3b8", borderRadius:8, padding:"8px 12px", color:"#1a202c" }}>
+                      <div style={{ fontWeight:700, marginBottom:4 }}>{d.name}</div>
+                      <div>NT${fmt(d.value)}</div>
+                      <div style={{ color:"#4a5568", fontSize:11, marginTop:2 }}>${fmt(d.value/usdTwd)}</div>
+                    </div>
+                  );
+                }} />
                 <Legend formatter={v => <span style={{ color:"#8892a8", fontSize:12 }}>{v}</span>} />
               </PieChart>
             </ResponsiveContainer>
+            <div style={{ display:"flex", justifyContent:"center", gap:24, marginTop:8 }}>
+              {marketPie.map((m,i) => (
+                <div key={m.name} style={{ textAlign:"center" }}>
+                  <div style={{ color:i===0?"#38bdf8":"#a78bfa", fontWeight:700, fontSize:13 }}>NT${fmt(m.value)}</div>
+                  <div style={{ color:"#6b7a99", fontSize:11 }}>${fmt(m.value/usdTwd)}</div>
+                </div>
+              ))}
+            </div>
           </div>
 
 
