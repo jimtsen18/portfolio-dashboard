@@ -1417,7 +1417,7 @@ export default function App() {
               {marketPie.map((m,i) => (
                 <div key={m.name} style={{ textAlign:"center" }}>
                   <div style={{ color:i===0?"#38bdf8":"#a78bfa", fontWeight:700, fontSize:13 }}>NT${fmt(m.value)}</div>
-                  <div style={{ color:"#6b7a99", fontSize:11 }}>${fmt(m.value/usdTwd)}</div>
+                  <div style={{ color:i===0?"#38bdf8":"#a78bfa", fontWeight:700, fontSize:13 }}>${fmt(m.value/usdTwd)}</div>
                 </div>
               ))}
             </div>
