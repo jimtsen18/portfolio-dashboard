@@ -202,10 +202,11 @@ const INP = { background:"#0f1422", border:"1px solid #2a3045", borderRadius:6, 
 const LBL = { color:"#6b7a99", fontSize:11, marginBottom:4 };
 
 // ─── SMALL COMPONENTS ────────────────────────────────────────────────────────
-const KPICard = ({ label, value, sub, color="#38bdf8" }) => (
+const KPICard = ({ label, value, value2, sub, color="#38bdf8" }) => (
   <div style={{ background:"#1a1f2e", border:"1px solid #2a3045", borderRadius:12, padding:"16px 20px", minWidth:0, height:"100%", boxSizing:"border-box" }}>
     <div style={{ fontSize:11, color:"#6b7a99", letterSpacing:"0.08em", textTransform:"uppercase", marginBottom:6 }}>{label}</div>
     <div style={{ fontSize:22, fontWeight:700, color, letterSpacing:"-0.5px" }}>{value}</div>
+    {value2 && <div style={{ fontSize:22, fontWeight:700, color, letterSpacing:"-0.5px", marginTop:2 }}>{value2}</div>}
     {sub && <div style={{ fontSize:12, color:"#6b7a99", marginTop:4 }}>{sub}</div>}
   </div>
 );
@@ -1261,7 +1262,7 @@ export default function App() {
 
       {/* ── KPI ROW 1 ── */}
       <div className="kpi-all" style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:12, marginBottom:24 }}>
-        <div className="kpi-order-1" style={{ height:"100%" }}><KPICard label="總市值（TWD）"   value={"NT$"+fmt(totalTWD)}           sub={`≈ $${fmt(totalTWD/usdTwd)} ・投入成本 NT$${fmt(totalCost)}`}   color={CARD_COLORS.totalValue} /></div>
+        <div className="kpi-order-1" style={{ height:"100%" }}><KPICard label="總市值"   value={"NT$"+fmt(totalTWD)}  value2={"$"+fmt(totalTWD/usdTwd)}         sub={`投入成本 NT$${fmt(totalCost)}`}   color={CARD_COLORS.totalValue} /></div>
         <div className="kpi-order-2" style={{ height:"100%" }}><KPICard label="未實現損益"       value={"NT$"+fmtSign(totalUnreal)}    sub={fmtPct(totalROI)+" vs 成本"}    color={CARD_COLORS.unrealized} /></div>
         <div className="kpi-order-3" style={{ height:"100%" }}><KPICard label={activePeriodLabel+" 股息收入"} value={"NT$"+fmt(divIncome)}   sub={"含即時換匯 ×"+usdTwd.toFixed(2)}    color={CARD_COLORS.div}        /></div>
         <div className="kpi-order-4" style={{ height:"100%" }}><KPICard label="已實現資本利得"   value={"NT$"+fmtSign(totalReal)}      sub="賣出交易累積"                    color={CARD_COLORS.realized}   /></div>
