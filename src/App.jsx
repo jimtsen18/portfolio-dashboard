@@ -1262,7 +1262,7 @@ export default function App() {
 
       {/* ── KPI ROW 1 ── */}
       <div className="kpi-all" style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:12, marginBottom:24 }}>
-        <div className="kpi-order-1" style={{ height:"100%" }}><KPICard label="總市值"   value={"NT$"+fmt(totalTWD)}  value2={"$"+fmt(totalTWD/usdTwd)}         sub={`投入成本 NT$${fmt(totalCost)}`}   color={CARD_COLORS.totalValue} /></div>
+        <div className="kpi-order-1" style={{ height:"100%" }}><KPICard label="總市值"   value={"NTD NT$"+fmt(totalTWD)}  value2={"USD $"+fmt(totalTWD/usdTwd)}         sub={`投入成本 NT$${fmt(totalCost)}`}   color={CARD_COLORS.totalValue} /></div>
         <div className="kpi-order-2" style={{ height:"100%" }}><KPICard label="未實現損益"       value={"NT$"+fmtSign(totalUnreal)}    sub={fmtPct(totalROI)+" vs 成本"}    color={CARD_COLORS.unrealized} /></div>
         <div className="kpi-order-3" style={{ height:"100%" }}><KPICard label={activePeriodLabel+" 股息收入"} value={"NT$"+fmt(divIncome)}   sub={"含即時換匯 ×"+usdTwd.toFixed(2)}    color={CARD_COLORS.div}        /></div>
         <div className="kpi-order-4" style={{ height:"100%" }}><KPICard label="已實現資本利得"   value={"NT$"+fmtSign(totalReal)}      sub="賣出交易累積"                    color={CARD_COLORS.realized}   /></div>
