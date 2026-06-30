@@ -1393,7 +1393,7 @@ export default function App() {
 
           {/* Donut: TW vs US */}
           <div style={{ background:"#1a1f2e", border:"1px solid #2a3045", borderRadius:12, padding:20 }}>
-            <div style={{ color:"#8892a8", fontSize:12, marginBottom:12 }}>台股 vs 美股（TWD 換算）</div>
+            <div style={{ color:"#8892a8", fontSize:12, marginBottom:12 }}>台股 vs 美股</div>
             <ResponsiveContainer width="100%" height={240}>
               <PieChart>
                 <Pie data={marketPie} cx="50%" cy="50%" innerRadius={56} outerRadius={92} paddingAngle={4} dataKey="value">
