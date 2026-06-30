@@ -1416,8 +1416,8 @@ export default function App() {
             <div style={{ display:"flex", justifyContent:"center", gap:24, marginTop:8 }}>
               {marketPie.map((m,i) => (
                 <div key={m.name} style={{ textAlign:"center" }}>
-                  <div style={{ color:i===0?"#38bdf8":"#a78bfa", fontWeight:700, fontSize:13 }}>NT${fmt(m.value)}</div>
-                  <div style={{ color:i===0?"#38bdf8":"#a78bfa", fontWeight:700, fontSize:13 }}>${fmt(m.value/usdTwd)}</div>
+                  <div style={{ color:i===0?"#38bdf8":"#a78bfa", fontWeight:700, fontSize:13 }}>NTD NT${fmt(m.value)}</div>
+                  <div style={{ color:i===0?"#38bdf8":"#a78bfa", fontWeight:700, fontSize:13 }}>USD ${fmt(m.value/usdTwd)}</div>
                 </div>
               ))}
             </div>
