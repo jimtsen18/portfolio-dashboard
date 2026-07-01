@@ -1551,10 +1551,10 @@ export default function App() {
                           </Badge>
                         </td>
                         <td style={{ padding:"11px 14px", textAlign:"right", color:"#e2e8f0" }}>{fmt(p.shares, p.market==="US"?5:0)}</td>
-                        <td style={{ padding:"11px 14px", textAlign:"right", color:"#8892a8" }}>{p.market==="TW"?"NT$":"$"}{p.wac.toFixed(2)}</td>
-                        <td style={{ padding:"11px 14px", textAlign:"right", color:"#8892a8" }}>{p.market==="TW"?"NT$":"$"}{fmt(p.totalBuyCost,2)}</td>
+                        <td style={{ padding:"11px 14px", textAlign:"right", color:"#8892a8", fontVariantNumeric:"tabular-nums" }}>{p.market==="TW"?"NTD$":"USD$"}{p.wac.toFixed(2)}</td>
+                        <td style={{ padding:"11px 14px", textAlign:"right", color:"#8892a8", fontVariantNumeric:"tabular-nums" }}>{p.market==="TW"?"NTD$":"USD$"}{fmt(p.totalBuyCost,2)}</td>
                         <td style={{ padding:"11px 14px", textAlign:"right" }}>
-                          <span style={{ color:"#38bdf8", fontWeight:600 }}>{p.market==="TW"?"NT$":"$"}{p.price.toFixed(2)}</span>
+                          <span style={{ color:"#38bdf8", fontWeight:600, fontVariantNumeric:"tabular-nums" }}>{p.market==="TW"?"NTD$":"USD$"}{p.price.toFixed(2)}</span>
                         </td>
                         <td style={{ padding:"11px 14px", textAlign:"right" }}>
                           <div style={{ display:"flex", flexDirection:"column", alignItems:"flex-end", gap:2 }}>
