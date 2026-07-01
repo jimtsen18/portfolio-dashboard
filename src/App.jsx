@@ -1584,7 +1584,7 @@ export default function App() {
                         <td style={{ padding:"11px 14px", textAlign:"center" }}>
                           <button onClick={() => setEditingPosition(p)}
                             style={{ background:"#0d1f35", border:"1px solid #38bdf855", borderRadius:6, color:"#38bdf8",
-                              padding:"4px 12px", cursor:"pointer", fontSize:11, fontWeight:600 }}>
+                              padding:"4px 12px", cursor:"pointer", fontSize:11, fontWeight:600, whiteSpace:"nowrap" }}>
                             ✏️ 編輯
                           </button>
                         </td>
