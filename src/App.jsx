@@ -499,7 +499,7 @@ const AddDivForm = ({ onAdd, positions }) => {
         </label>
       </div>
       <div style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:12 }}>
-        <div><div style={LBL}>發放日期</div><input type="date" value={f.date} onChange={e=>setF(p=>({...p,date:e.target.value}))} style={INP} /></div>
+        <div><div style={LBL}>除息日</div><input type="date" value={f.date} onChange={e=>setF(p=>({...p,date:e.target.value}))} style={INP} /></div>
         <div><div style={LBL}>股票代號</div><input value={f.symbol} onChange={handleSymbolChange} placeholder="e.g. 00919" style={INP} /></div>
         <div><div style={LBL}>市場</div>
           <select value={f.market} onChange={e=>setF(p=>({...p,market:e.target.value}))} style={INP}>
@@ -1853,9 +1853,9 @@ export default function App() {
             <table style={{ width:"100%", borderCollapse:"collapse", fontSize:13 }}>
               <thead>
                 <tr style={{ background:"#0f1422" }}>
-                  {["發放日期","代號","市場","每股股息","持有股數","實際領取（原幣）","TWD 換算","操作"].map(h => (
+                  {["除息日","代號","市場","每股股息","持有股數","實際領取（原幣）","TWD 換算","操作"].map(h => (
                     <th key={h} style={{ padding:"12px 14px", color:"#6b7a99", fontWeight:600,
-                      textAlign:["發放日期","代號","市場"].includes(h)?"left":"right",
+                      textAlign:["除息日","代號","市場"].includes(h)?"left":"right",
                       whiteSpace:"nowrap", fontSize:11 }}>{h}</th>
                   ))}
                 </tr>
