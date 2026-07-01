@@ -1566,8 +1566,11 @@ export default function App() {
                             </div>
                           </div>
                         </td>
-                        <td style={{ padding:"11px 14px", textAlign:"right", color:p.unrealized>=0?"#34d399":"#f87171", fontWeight:700 }}>
-                          NT${fmtSign(p.unrealTWD)}
+                        <td style={{ padding:"11px 14px", textAlign:"right" }}>
+                          <div style={{ display:"flex", flexDirection:"column", alignItems:"flex-end", gap:2 }}>
+                            <span style={{ color:p.unrealized>=0?"#34d399":"#f87171", fontWeight:700, fontVariantNumeric:"tabular-nums" }}>NTD${fmtSign(Math.round(p.unrealTWD))}</span>
+                            <span style={{ color:p.unrealized>=0?"#34d399":"#f87171", fontSize:11, fontVariantNumeric:"tabular-nums" }}>USD${fmtSign(Math.round(p.unrealTWD/usdTwd))}</span>
+                          </div>
                         </td>
                         <td style={{ padding:"11px 14px", textAlign:"right", color:p.realTWD>=0?"#a78bfa":"#f87171", fontWeight:600 }}>
                           {p.realTWD!==0 ? "NT$"+fmtSign(p.realTWD) : <span style={{ color:"#2a3045" }}>—</span>}
