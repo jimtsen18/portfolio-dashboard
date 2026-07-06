@@ -1754,7 +1754,9 @@ export default function App() {
         <div>
           <div style={{ display:"grid", gridTemplateColumns: isMobile ? "1fr" : "repeat(3,1fr)", gap:12, marginBottom:16 }}>
             <KPICard label={activePeriodLabel+" 股息總收入"} value={"NT$"+fmt(divIncome)}   sub="TWD 換算"     color="#34d399" />
-            <KPICard label="股息筆數"                        value={fmt(filteredDivs.length)} sub={activePeriodLabel+" 期間"} color="#38bdf8" />
+            <KPICard label="月均股息"
+              value={"NT$"+fmt(Math.round(filteredDivs.length > 0 ? filteredDivs.reduce((s,d) => s + (d.market==="US" ? d.totalAmount*usdTwd : d.totalAmount), 0) / Math.max(1, (() => { const dates = filteredDivs.map(d => d.date.slice(0,7)); const unique = [...new Set(dates)]; return unique.length; })()) : 0))}
+              sub={activePeriodLabel+" 期間平均"} color="#38bdf8" />
             <KPICard label="年化股息率"                      value={(() => {
               const divSymbols = new Set(filteredDivs.map(d => d.symbol));
               const divCost = positions.filter(p => divSymbols.has(p.symbol)).reduce((s, p) => s + toTWD(p.totalBuyCost, p.market, usdTwd), 0);
