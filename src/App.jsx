@@ -1686,7 +1686,7 @@ export default function App() {
                       <td style={{ padding:"10px 14px" }}><Badge color={t.market==="TW"?"#38bdf8":"#a78bfa"}>{t.market==="TW"?"台股":"美股"}</Badge></td>
                       <td style={{ padding:"10px 14px", color:"#8892a8", whiteSpace:"nowrap" }}>{t.date}</td>
                       <td style={{ padding:"10px 14px", textAlign:"right", color:"#e2e8f0" }}>{fmt(t.shares, t.market==="US"?5:0)}</td>
-                      <td style={{ padding:"10px 14px", textAlign:"right", color:"#e2e8f0" }}>{t.market==="TW"?"NT$":"$"}{t.price.toFixed(2)}</td>
+                      <td style={{ padding:"10px 14px", textAlign:"right", color:"#e2e8f0" }}>{t.market==="TW"?"NT$":"$"}{t.market==="US"?t.price.toFixed(6):t.price.toFixed(2)}</td>
                       <td style={{ padding:"10px 14px", textAlign:"right", color:"#6b7a99" }}>{fmt(t.fee||0,2)}</td>
                       <td style={{ padding:"10px 14px", textAlign:"right", color:"#e2e8f0", fontWeight:600 }}>
                         {t.market==="TW"?"NT$":"$"}{fmt(t.type==="sell"?t.shares*t.price-(t.fee||0):t.shares*t.price+(t.fee||0),2)}
