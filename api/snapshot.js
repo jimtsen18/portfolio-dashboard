@@ -42,16 +42,23 @@ export default async function handler(req, res) {
   }
 
   try {
-    const usersSnap = await db.collection("users").get();
+    // 用 collectionGroup 跨所有用戶抓 portfolio_trades
+    const tradesSnap = await db.collectionGroup("portfolio_trades").get();
+
+    // 依 uid 分組
+    const userTrades = {};
+    tradesSnap.docs.forEach(d => {
+      // path: users/{uid}/portfolio_trades/{tradeId}
+      const uid = d.ref.path.split("/")[1];
+      if (!userTrades[uid]) userTrades[uid] = [];
+      userTrades[uid].push(d.data());
+    });
+
+    const usdTwd = await fetchFxRate();
     const results = [];
 
-    for (const userDoc of usersSnap.docs) {
-      const uid = userDoc.id;
+    for (const [uid, trades] of Object.entries(userTrades)) {
       try {
-        const tradesSnap = await db.collection("users").doc(uid).collection("portfolio_trades").get();
-        const trades = tradesSnap.docs.map(d => d.data());
-        if (trades.length === 0) continue;
-
         const symbols = [...new Set(trades.map(t => t.symbol))];
         const twSymbols = symbols.filter(s => /^\d/.test(s));
         const usSymbols = symbols.filter(s => !/^\d/.test(s));
@@ -61,8 +68,6 @@ export default async function handler(req, res) {
           ...twSymbols.map(async sym => { const p = await fetchTWPrice(sym); if (p) prices[sym] = p; }),
           ...usSymbols.map(async sym => { const p = await fetchUSPrice(sym); if (p) prices[sym] = p; }),
         ]);
-
-        const usdTwd = await fetchFxRate();
 
         // 計算持倉
         const map = {};
