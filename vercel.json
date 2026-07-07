@@ -2,5 +2,11 @@
   "rewrites": [
     { "source": "/__/auth/(.*)", "destination": "/index.html" },
     { "source": "/(.*)", "destination": "/index.html" }
+  ],
+  "crons": [
+    {
+      "path": "/api/snapshot",
+      "schedule": "0 8 * * *"
+    }
   ]
 }
