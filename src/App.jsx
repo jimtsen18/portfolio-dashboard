@@ -414,8 +414,8 @@ const AddTradeForm = ({ onAdd }) => {
       symbol: f.symbol.toUpperCase().trim(),
       market: f.market,
       date: f.date,
-      shares: parseFloat(f.shares),
-      price: parseFloat(parseFloat(f.price).toFixed(2)),
+      shares: Math.round(parseFloat(f.shares) * 1e5) / 1e5,
+      price: Math.round(parseFloat(f.price) * 1e6) / 1e6,
       fee: parseFloat(f.fee) || 0,
     });
     setF(blank); setErr(""); setSaving(false);
@@ -447,7 +447,7 @@ const AddTradeForm = ({ onAdd }) => {
         </div>
         <div><div style={LBL}>交易日期</div><input type="date" value={f.date} onChange={set("date")} style={INP} /></div>
         <div><div style={LBL}>{isSell?"賣出股數":"購入股數"}</div><input type="number" step="0.00001" value={f.shares} onChange={set("shares")} placeholder="100" style={INP} /></div>
-        <div><div style={LBL}>{isSell?"賣出單價":"買入單價"}（精確至分）</div><input type="number" step="0.01" value={f.price} onChange={set("price")} placeholder="0.00" style={INP} /></div>
+        <div><div style={LBL}>{isSell?"賣出單價":"買入單價"}（精確至分）</div><input type="number" step="0.000001" value={f.price} onChange={set("price")} placeholder="0.000000" style={INP} /></div>
         <div><div style={LBL}>{isSell?"手續費+稅金":"手續費"}</div><input type="number" step="0.01" value={f.fee} onChange={set("fee")} placeholder="0" style={INP} /></div>
       </div>
       {err && <div style={{ color:"#f87171", fontSize:12, marginTop:8 }}>{err}</div>}
@@ -553,8 +553,8 @@ const EditTradeModal = ({ trade, onSave, onDelete, onClose }) => {
       symbol: f.symbol.toUpperCase().trim(),
       market: f.market,
       date: f.date,
-      shares: parseFloat(f.shares),
-      price: parseFloat(parseFloat(f.price).toFixed(2)),
+      shares: Math.round(parseFloat(f.shares) * 1e5) / 1e5,
+      price: Math.round(parseFloat(f.price) * 1e6) / 1e6,
       fee: parseFloat(f.fee) || 0,
     });
     setSaving(false);
@@ -590,7 +590,7 @@ const EditTradeModal = ({ trade, onSave, onDelete, onClose }) => {
           </div>
           <div><div style={LBL}>交易日期</div><input type="date" value={f.date} onChange={set("date")} style={INP} /></div>
           <div><div style={LBL}>{isSell?"賣出股數":"購入股數"}</div><input type="number" step="0.00001" value={f.shares} onChange={set("shares")} style={INP} /></div>
-          <div><div style={LBL}>{isSell?"賣出單價":"買入單價"}（精確至分）</div><input type="number" step="0.01" value={f.price} onChange={set("price")} style={INP} /></div>
+          <div><div style={LBL}>{isSell?"賣出單價":"買入單價"}（精確至分）</div><input type="number" step="0.000001" value={f.price} onChange={set("price")} style={INP} /></div>
           <div><div style={LBL}>{isSell?"手續費+稅金":"手續費"}</div><input type="number" step="0.01" value={f.fee} onChange={set("fee")} style={INP} /></div>
         </div>
         {err && <div style={{ color:"#f87171", fontSize:12, marginTop:8 }}>{err}</div>}
