@@ -1446,21 +1446,49 @@ export default function App() {
             )}
           </div>
 
-          {/* Bar: realized gains */}
+          {/* Donut: cost basis TW vs US */}
           <div style={{ background:"#1a1f2e", border:"1px solid #2a3045", borderRadius:12, padding:20 }}>
-            <div style={{ color:"#8892a8", fontSize:12, marginBottom:12 }}>已實現資本利得（{activePeriodLabel}，TWD）</div>
-            <ResponsiveContainer width="100%" height={180}>
-              <BarChart data={gainBarData} margin={{ top:4, right:16, left:0, bottom:0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#1e2535" />
-                <XAxis dataKey="month" tick={{ fill:"#6b7a99", fontSize:10 }} />
-                <YAxis tick={{ fill:"#6b7a99", fontSize:10 }} tickFormatter={v=>"NT$"+v} />
-                <Tooltip content={<CustomTooltip />} />
-                <Bar dataKey="value" name="已實現利得" fill="#a78bfa" radius={[4,4,0,0]} />
-              </BarChart>
-            </ResponsiveContainer>
-            {gainBarData.length===0 && (
-              <div style={{ color:"#4a5568", fontSize:12, textAlign:"center", marginTop:40 }}>此期間無賣出紀錄</div>
-            )}
+            <div style={{ color:"#8892a8", fontSize:12, marginBottom:12 }}>持倉成本分佈（台股 NTD／美股 USD）</div>
+            {(() => {
+              const twCost = positions.filter(p=>p.market==="TW").reduce((s,p)=>s+p.totalBuyCost,0);
+              const usCost = positions.filter(p=>p.market==="US").reduce((s,p)=>s+p.totalBuyCost,0);
+              const costPie = [
+                { name:"台股 🇹🇼", value: Math.round(twCost), display: "NTD$"+fmt(Math.round(twCost)) },
+                { name:"美股 🇺🇸", value: Math.round(usCost * usdTwd), display: "USD$"+fmt(usCost,2) },
+              ];
+              const totalCostTWD = Math.round(twCost + usCost * usdTwd);
+              return (
+                <>
+                  <ResponsiveContainer width="100%" height={240}>
+                    <PieChart>
+                      <Pie data={costPie} cx="50%" cy="50%" innerRadius={56} outerRadius={92} paddingAngle={4} dataKey="value">
+                        <Cell fill="#38bdf8" /><Cell fill="#a78bfa" />
+                      </Pie>
+                      <Tooltip content={({ payload }) => {
+                        if (!payload || !payload[0]) return null;
+                        const d = payload[0].payload;
+                        return (
+                          <div style={{ background:"#e2e8f0", border:"1px solid #94a3b8", borderRadius:8, padding:"8px 12px", color:"#1a202c" }}>
+                            <div style={{ fontWeight:700, marginBottom:4 }}>{d.name}</div>
+                            <div>{d.display}</div>
+                            <div style={{ color:"#4a5568", fontSize:11, marginTop:2 }}>{totalCostTWD>0?(d.value/totalCostTWD*100).toFixed(1):0}%</div>
+                          </div>
+                        );
+                      }} />
+                      <Legend formatter={v => <span style={{ color:"#8892a8", fontSize:12 }}>{v}</span>} />
+                    </PieChart>
+                  </ResponsiveContainer>
+                  <div style={{ display:"flex", justifyContent:"center", gap:24, marginTop:8 }}>
+                    {costPie.map((m,i) => (
+                      <div key={m.name} style={{ textAlign:"center" }}>
+                        <div style={{ color:i===0?"#38bdf8":"#a78bfa", fontWeight:700, fontSize:13, fontVariantNumeric:"tabular-nums" }}>{m.display}</div>
+                        <div style={{ color:i===0?"#38bdf8":"#a78bfa", fontWeight:700, fontSize:13, fontVariantNumeric:"tabular-nums" }}>NTD${fmt(m.value)}</div>
+                      </div>
+                    ))}
+                  </div>
+                </>
+              );
+            })()}
           </div>
 
         </div>
