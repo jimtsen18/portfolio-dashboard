@@ -1636,11 +1636,8 @@ export default function App() {
             <KPICard label="已實現資本利得（全部）"    value={"NT$"+fmtSign(totalReal)}        sub="所有賣出交易合計" color={totalReal>=0?"#a78bfa":"#f87171"} />
             <KPICard label={activePeriodLabel+" 賣出報酬率"}
               value={(() => {
-                const sellCost = filteredSells.reduce((s,t) => {
-                  const pos = rawPositions.find(p=>p.symbol===t.symbol);
-                  const wac = pos ? pos.wac : 0;
-                  return s + toTWD(wac * t.shares, t.market, usdTwd);
-                }, 0);
+                const sellRevenue = filteredSells.reduce((s,t) => s + toTWD((t.shares*(t.price||0))-(t.fee||0), t.market, usdTwd), 0);
+                const sellCost = sellRevenue - realizedInPeriod;
                 if (sellCost <= 0) return "—";
                 const roi = realizedInPeriod / sellCost * 100;
                 return (roi >= 0 ? "+" : "") + roi.toFixed(2) + "%";
@@ -1718,9 +1715,10 @@ export default function App() {
                   const realized = t.type==="sell"
                     ? toTWD(t.shares*t.price - (t.fee||0) - wac*t.shares, t.market, usdTwd)
                     : null;
-                  const sellBuyCost = t.type==="sell" ? wac * t.shares : 0;
-                  const realizedRoi = t.type==="sell" && sellBuyCost > 0
-                    ? (toTWD(t.shares*t.price - (t.fee||0), t.market, usdTwd) - toTWD(sellBuyCost, t.market, usdTwd)) / toTWD(sellBuyCost, t.market, usdTwd) * 100
+                  const sellRevenueSingle = t.type==="sell" ? toTWD((t.shares*(t.price||0))-(t.fee||0), t.market, usdTwd) : 0;
+                  const sellCostSingle = t.type==="sell" && realized!=null ? sellRevenueSingle - realized : 0;
+                  const realizedRoi = t.type==="sell" && sellCostSingle > 0
+                    ? realized / sellCostSingle * 100
                     : null;
                   return (
                     <tr key={t.id} style={{ borderTop:"1px solid #1e2535", background:i%2===0?"transparent":"#0f1422" }}>
