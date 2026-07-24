@@ -1579,7 +1579,7 @@ export default function App() {
                           </Badge>
                         </td>
                         <td style={{ padding:"11px 14px", textAlign:"right", color:"#e2e8f0" }}>{fmt(p.shares, p.market==="US"?5:0)}</td>
-                        <td style={{ padding:"11px 14px", textAlign:"right", color:"#8892a8", fontVariantNumeric:"tabular-nums" }}>{p.market==="TW"?"NTD$":"USD$"}{p.wac.toFixed(2)}</td>
+                        <td style={{ padding:"11px 14px", textAlign:"right", color:"#8892a8", fontVariantNumeric:"tabular-nums" }}>{p.market==="TW"?"NTD$":"USD$"}{p.wac!=null?p.wac.toFixed(2):"—"}</td>
                         <td style={{ padding:"11px 14px", textAlign:"right", color:"#8892a8", fontVariantNumeric:"tabular-nums" }}>{p.market==="TW"?"NTD$":"USD$"}{fmt(p.totalBuyCost,2)}</td>
                         <td style={{ padding:"11px 14px", textAlign:"right" }}>
                           <span style={{ color:"#38bdf8", fontWeight:600, fontVariantNumeric:"tabular-nums" }}>{p.market==="TW"?"NTD$":"USD$"}{p.price!=null?p.price.toFixed(2):"—"}</span>
@@ -1694,7 +1694,7 @@ export default function App() {
                   const pos = positions.find(p => p.symbol===t.symbol);
                   const wac = pos ? pos.wac : 0;
                   const currentPrice = prices[t.symbol] || 0;
-                  const buyCost = t.shares * t.price + (t.fee||0);
+                  const buyCost = (t.shares||0) * (t.price||0) + (t.fee||0);
                   const unrealized = t.type==="buy"
                     ? toTWD(t.shares * currentPrice - buyCost, t.market, usdTwd)
                     : null;
@@ -1726,7 +1726,7 @@ export default function App() {
                               NT${fmtSign(Math.round(unrealized))}
                             </div>
                             <div style={{ color:unrealizedRoi>=0?"#34d399":"#f87171", fontSize:11, whiteSpace:"nowrap" }}>
-                              {unrealizedRoi>=0?"+":""}{unrealizedRoi.toFixed(2)}%
+                              {unrealizedRoi>=0?"+":""}{unrealizedRoi!=null?unrealizedRoi.toFixed(2):"—"}%
                             </div>
                           </div>
                         ) : t.type==="sell" && realized!==null ? (
@@ -1735,7 +1735,7 @@ export default function App() {
                               NT${fmtSign(Math.round(realized))}
                             </div>
                             <div style={{ color:realizedRoi>=0?"#a78bfa":"#f87171", fontSize:11, whiteSpace:"nowrap" }}>
-                              {realizedRoi>=0?"+":""}{realizedRoi.toFixed(2)}%
+                              {realizedRoi>=0?"+":""}{realizedRoi!=null?realizedRoi.toFixed(2):"—"}%
                             </div>
                           </div>
                         ) : (
