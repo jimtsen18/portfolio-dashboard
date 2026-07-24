@@ -1024,8 +1024,10 @@ export default function App() {
   const filteredSells     = filterByPeriod(trades.filter(t => t.type==="sell"), period, yearFilter);
   const realizedInPeriod  = filteredSells.reduce((s, t) => {
     const pos = positions.find(p => p.symbol===t.symbol);
-    if (!pos) return s;
-    return s + toTWD(t.shares*t.price - (t.fee||0) - pos.wac*t.shares, t.market, usdTwd);
+    const rawPos = rawPositions.find(p => p.symbol===t.symbol);
+    const wac = (pos?.wac > 0) ? pos.wac : (rawPos?.peakWac || rawPos?.wac || 0);
+    if (!wac) return s;
+    return s + toTWD(t.shares*t.price - (t.fee||0) - wac*t.shares, t.market, usdTwd);
   }, 0);
   const periodCapGain = realizedInPeriod + totalUnreal;
 
