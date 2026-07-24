@@ -1636,10 +1636,18 @@ export default function App() {
             <KPICard label="已實現資本利得（全部）"    value={"NT$"+fmtSign(totalReal)}        sub="所有賣出交易合計" color={totalReal>=0?"#a78bfa":"#f87171"} />
             <KPICard label={activePeriodLabel+" 賣出報酬率"}
               value={(() => {
-                const sellRevenue = filteredSells.reduce((s,t) => s + toTWD((t.shares*(t.price||0))-(t.fee||0), t.market, usdTwd), 0);
-                const sellCost = sellRevenue - realizedInPeriod;
-                if (sellCost <= 0) return "—";
-                const roi = realizedInPeriod / sellCost * 100;
+                let totalGain = 0, totalCost = 0;
+                filteredSells.forEach(t => {
+                  const pos = rawPositions.find(p=>p.symbol===t.symbol);
+                  const wac = pos ? pos.wac : 0;
+                  if (wac <= 0) return;
+                  const cost = toTWD(wac * t.shares, t.market, usdTwd);
+                  const gain = toTWD((t.shares*(t.price||0))-(t.fee||0), t.market, usdTwd) - cost;
+                  totalGain += gain;
+                  totalCost += cost;
+                });
+                if (totalCost <= 0) return "—";
+                const roi = totalGain / totalCost * 100;
                 return (roi >= 0 ? "+" : "") + roi.toFixed(2) + "%";
               })()}
               sub={"資本利得 NT$"+fmtSign(Math.round(realizedInPeriod))}
@@ -1715,9 +1723,8 @@ export default function App() {
                   const realized = t.type==="sell"
                     ? toTWD(t.shares*t.price - (t.fee||0) - wac*t.shares, t.market, usdTwd)
                     : null;
-                  const sellRevenueSingle = t.type==="sell" ? toTWD((t.shares*(t.price||0))-(t.fee||0), t.market, usdTwd) : 0;
-                  const sellCostSingle = t.type==="sell" && realized!=null ? sellRevenueSingle - realized : 0;
-                  const realizedRoi = t.type==="sell" && sellCostSingle > 0
+                  const sellCostSingle = t.type==="sell" ? toTWD(wac * t.shares, t.market, usdTwd) : 0;
+                  const realizedRoi = t.type==="sell" && sellCostSingle > 0 && realized!=null
                     ? realized / sellCostSingle * 100
                     : null;
                   return (
