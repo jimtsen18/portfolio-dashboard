@@ -1636,11 +1636,13 @@ export default function App() {
             <KPICard label={activePeriodLabel+" 賣出報酬率"}
               value={(() => {
                 const sellCost = filteredSells.reduce((s,t) => {
-                  const pos = positions.find(p=>p.symbol===t.symbol);
+                  const pos = rawPositions.find(p=>p.symbol===t.symbol);
                   const wac = pos ? pos.wac : 0;
                   return s + toTWD(wac * t.shares, t.market, usdTwd);
                 }, 0);
-                return sellCost > 0 ? (realizedInPeriod/sellCost*100>=0?"+":""+(realizedInPeriod/sellCost*100).toFixed(2)+"%") : "—";
+                if (sellCost <= 0) return "—";
+                const roi = realizedInPeriod / sellCost * 100;
+                return (roi >= 0 ? "+" : "") + roi.toFixed(2) + "%";
               })()}
               sub={"資本利得 NT$"+fmtSign(Math.round(realizedInPeriod))}
               color={realizedInPeriod>=0?"#34d399":"#f87171"} />
@@ -1702,7 +1704,8 @@ export default function App() {
                   })
                   .map((t, i) => {
                   const pos = positions.find(p => p.symbol===t.symbol);
-                  const wac = pos ? pos.wac : 0;
+                  const rawPos = rawPositions.find(p => p.symbol===t.symbol);
+                  const wac = (pos || rawPos) ? (pos || rawPos).wac : 0;
                   const currentPrice = prices[t.symbol] || 0;
                   const buyCost = (t.shares||0) * (t.price||0) + (t.fee||0);
                   const unrealized = t.type==="buy"
