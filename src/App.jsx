@@ -1633,7 +1633,17 @@ export default function App() {
         <div>
           <div style={{ display:"grid", gridTemplateColumns: isMobile ? "1fr" : "repeat(3,1fr)", gap:12, marginBottom:16 }}>
             <KPICard label="已實現資本利得（全部）"    value={"NT$"+fmtSign(totalReal)}        sub="所有賣出交易合計" color={totalReal>=0?"#a78bfa":"#f87171"} />
-            <KPICard label={activePeriodLabel+" 期間已實現"} value={"NT$"+fmtSign(realizedInPeriod)} sub="期間賣出交易"   color={realizedInPeriod>=0?"#34d399":"#f87171"} />
+            <KPICard label={activePeriodLabel+" 賣出報酬率"}
+              value={(() => {
+                const sellCost = filteredSells.reduce((s,t) => {
+                  const pos = positions.find(p=>p.symbol===t.symbol);
+                  const wac = pos ? pos.wac : 0;
+                  return s + toTWD(wac * t.shares, t.market, usdTwd);
+                }, 0);
+                return sellCost > 0 ? (realizedInPeriod/sellCost*100>=0?"+":""+(realizedInPeriod/sellCost*100).toFixed(2)+"%") : "—";
+              })()}
+              sub={"資本利得 NT$"+fmtSign(Math.round(realizedInPeriod))}
+              color={realizedInPeriod>=0?"#34d399":"#f87171"} />
             <KPICard label="賣出交易筆數"             value={fmt(trades.filter(t=>t.type==="sell").length)} sub="筆賣出" color="#38bdf8" />
           </div>
           {/* Filter + Sort controls */}
@@ -1704,8 +1714,9 @@ export default function App() {
                   const realized = t.type==="sell"
                     ? toTWD(t.shares*t.price - (t.fee||0) - wac*t.shares, t.market, usdTwd)
                     : null;
-                  const realizedRoi = t.type==="sell" && wac > 0
-                    ? (t.price - (t.fee||0)/t.shares - wac) / wac * 100
+                  const sellBuyCost = t.type==="sell" ? wac * t.shares : 0;
+                  const realizedRoi = t.type==="sell" && sellBuyCost > 0
+                    ? (toTWD(t.shares*t.price - (t.fee||0), t.market, usdTwd) - toTWD(sellBuyCost, t.market, usdTwd)) / toTWD(sellBuyCost, t.market, usdTwd) * 100
                     : null;
                   return (
                     <tr key={t.id} style={{ borderTop:"1px solid #1e2535", background:i%2===0?"transparent":"#0f1422" }}>
