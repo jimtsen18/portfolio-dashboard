@@ -144,6 +144,7 @@ const buildPositions = (trades) => {
           remainToSell = 0;
         }
       }
+      if (pos.shares > 0) pos.peakWac = Math.round((pos.totalBuyCost / pos.shares) * 1e6) / 1e6;
       pos.realizedGain += t.shares * t.price - (t.fee || 0) - costOfSold;
       pos.shares       -= t.shares;
       pos.totalBuyCost  = pos.lots.reduce((s, l) => s + l.shares * l.price, 0);
@@ -153,7 +154,7 @@ const buildPositions = (trades) => {
   });
   return Object.values(map).map(p => ({
     ...p,
-    wac: p.shares > 0 ? Math.round((p.totalBuyCost / p.shares) * 1e6) / 1e6 : 0,
+    wac: p.shares > 0 ? Math.round((p.totalBuyCost / p.shares) * 1e6) / 1e6 : (p.peakWac || 0),
   })).filter(p => p.shares > 0 || p.realizedGain !== 0);
 };
 
