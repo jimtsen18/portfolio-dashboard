@@ -1711,7 +1711,7 @@ export default function App() {
                   .map((t, i) => {
                   const pos = positions.find(p => p.symbol===t.symbol);
                   const rawPos = rawPositions.find(p => p.symbol===t.symbol);
-                  const wac = (pos || rawPos) ? (pos || rawPos).wac : 0; if(t.type==="sell") console.log("sell wac debug", t.symbol, "wac:", wac, "pos:", pos?.wac, "rawPos:", rawPos?.wac, "peakWac:", rawPos?.peakWac);
+                  const wac = pos?.wac > 0 ? pos.wac : (rawPos?.peakWac || rawPos?.wac || 0);
                   const currentPrice = prices[t.symbol] || 0;
                   const buyCost = (t.shares||0) * (t.price||0) + (t.fee||0);
                   const unrealized = t.type==="buy"
