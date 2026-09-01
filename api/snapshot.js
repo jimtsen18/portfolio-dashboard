@@ -63,10 +63,28 @@ export default async function handler(req, res) {
         const twSymbols = symbols.filter(s => /^\d/.test(s));
         const usSymbols = symbols.filter(s => !/^\d/.test(s));
 
+        // Last-known prices from Firestore act as a fallback whenever
+        // today's live fetch fails for a symbol (TWSE/Finnhub are flaky).
+        // Without this, a single failed fetch used to make that entire
+        // position silently vanish from the snapshot — dragging both
+        // marketValue AND totalCost down for the whole portfolio.
+        const lastKnownSnap = await db.collection("users").doc(uid).collection("portfolio_prices").get();
+        const lastKnown = {};
+        lastKnownSnap.docs.forEach(d => {
+          const data = d.data();
+          lastKnown[data.symbol] = data.price;
+        });
+
         const prices = {};
         await Promise.all([
-          ...twSymbols.map(async sym => { const p = await fetchTWPrice(sym); if (p) prices[sym] = p; }),
-          ...usSymbols.map(async sym => { const p = await fetchUSPrice(sym); if (p) prices[sym] = p; }),
+          ...twSymbols.map(async sym => {
+            const live = await fetchTWPrice(sym);
+            prices[sym] = live || lastKnown[sym] || 0;
+          }),
+          ...usSymbols.map(async sym => {
+            const live = await fetchUSPrice(sym);
+            prices[sym] = live || lastKnown[sym] || 0;
+          }),
         ]);
 
         // 計算持倉
@@ -84,14 +102,26 @@ export default async function handler(req, res) {
         });
 
         let totalMarketValue = 0, totalCost = 0;
+        const missingPriceSymbols = [];
         Object.values(map).forEach(pos => {
           if (pos.shares <= 0) return;
           const price = prices[pos.symbol] || 0;
-          if (price === 0) return;
+          if (price === 0) missingPriceSymbols.push(pos.symbol);
           const mv = pos.shares * price;
           totalMarketValue += pos.market === "US" ? mv * usdTwd : mv;
+          // Cost basis must never depend on whether today's price fetch
+          // succeeded — a held position always has a cost, priced or not.
           totalCost += pos.market === "US" ? pos.totalBuyCost * usdTwd : pos.totalBuyCost;
         });
+
+        // Safety net: if we truly have no price anywhere (no live fetch
+        // AND no last-known fallback) for a held symbol, don't write a
+        // partial/corrupted snapshot for the whole portfolio today — skip
+        // and let the next successful sync (cron or manual) fill it in.
+        if (missingPriceSymbols.length > 0) {
+          results.push({ uid, skipped: true, reason: `no price available for: ${missingPriceSymbols.join(", ")}` });
+          continue;
+        }
 
         if (totalMarketValue > 0) {
           const today = new Date().toISOString().slice(0, 10);
