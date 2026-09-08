@@ -1635,7 +1635,7 @@ export default function App() {
       {tab==="trades" && (
         <div>
           <div style={{ display:"grid", gridTemplateColumns: isMobile ? "1fr" : "repeat(3,1fr)", gap:12, marginBottom:16 }}>
-            <KPICard label="已實現資本利得（全部）"    value={"NT$"+fmtSign(totalReal)}        sub="所有賣出交易合計" color={totalReal>=0?"#a78bfa":"#f87171"} />
+            <KPICard label={activePeriodLabel+" 已實現資本利得"} value={"NT$"+fmtSign(Math.round(realizedInPeriod))} sub="期間賣出交易合計" color={realizedInPeriod>=0?"#a78bfa":"#f87171"} />
             <KPICard label={activePeriodLabel+" 賣出報酬率"}
               value={(() => {
                 let totalGain = 0, totalCost = 0;
@@ -1654,7 +1654,7 @@ export default function App() {
               })()}
               sub={"資本利得 NT$"+fmtSign(Math.round(realizedInPeriod))}
               color={realizedInPeriod>=0?"#34d399":"#f87171"} />
-            <KPICard label="賣出交易筆數"             value={fmt(trades.filter(t=>t.type==="sell").length)} sub="筆賣出" color="#38bdf8" />
+            <KPICard label={activePeriodLabel+" 賣出交易筆數"} value={fmt(filteredSells.length)} sub="期間賣出" color="#38bdf8" />
           </div>
           {/* Filter + Sort controls */}
           <div style={{ display:"flex", flexWrap:"wrap", gap:8, marginBottom:10, alignItems:"center" }}>
