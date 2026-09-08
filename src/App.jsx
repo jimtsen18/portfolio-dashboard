@@ -1269,7 +1269,7 @@ export default function App() {
         <div className="kpi-order-2" style={{ height:"100%" }}><KPICard label="未實現損益"       value={"NT$"+fmtSign(totalUnreal)}    sub={fmtPct(totalROI)+" vs 成本"}    color={CARD_COLORS.unrealized} /></div>
         <div className="kpi-order-3" style={{ height:"100%" }}><KPICard label={activePeriodLabel+" 股息收入"} value={"NT$"+fmt(divIncome)}   sub={"含即時換匯 ×"+usdTwd.toFixed(2)}    color={CARD_COLORS.div}        /></div>
         <div className="kpi-order-4" style={{ height:"100%" }}><KPICard label="已實現資本利得"   value={"NT$"+fmtSign(totalReal)}      sub="賣出交易累積"                    color={CARD_COLORS.realized}   /></div>
-        <div className="kpi-order-5" style={{ height:"100%" }}><KPICard label={activePeriodLabel+" 期間資本利得"} value={"NT$"+fmtSign(periodCapGain)} sub="已實現 + 目前未實現"     color={CARD_COLORS.periodGain} /></div>
+        <div className="kpi-order-5" style={{ height:"100%" }}><KPICard label="已實現損益" value={"NT$"+fmtSign(Math.round(totalReal + divIncome))} sub={"資本利得 NT$"+fmtSign(Math.round(totalReal))+" ・股息 NT$"+fmt(Math.round(divIncome))} color={CARD_COLORS.periodGain} /></div>
         <div className="kpi-order-6">
         {/* Market split */}
         <div style={{ background:"#1a1f2e", border:"1px solid #2a3045", borderRadius:12, padding:"16px 20px" }}>
