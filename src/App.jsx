@@ -1664,7 +1664,7 @@ export default function App() {
                 borderRadius:8, color:tradeFilterSymbol?"#38bdf8":"#6b7a99", padding:"6px 12px",
                 fontSize:12, fontWeight:600, cursor:"pointer", outline:"none" }}>
               <option value="">全部標的</option>
-              {[...new Set(trades.map(t => t.symbol))].sort().map(sym => (
+              {[...new Set(filterByPeriod(trades, period, yearFilter).map(t => t.symbol))].sort().map(sym => (
                 <option key={sym} value={sym}>{sym}</option>
               ))}
             </select>
@@ -1692,7 +1692,7 @@ export default function App() {
               })}
             </div>
             <span style={{ color:"#4a5568", fontSize:11 }}>
-              共 {trades.filter(t => (!tradeFilterSymbol || t.symbol===tradeFilterSymbol) && (!tradeFilterType || (t.type||"buy")===tradeFilterType)).length} 筆
+              共 {filterByPeriod(trades, period, yearFilter).filter(t => (!tradeFilterSymbol || t.symbol===tradeFilterSymbol) && (!tradeFilterType || (t.type||"buy")===tradeFilterType)).length} 筆
             </span>
           </div>
 
@@ -1709,7 +1709,7 @@ export default function App() {
               </thead>
               <tbody>
                 {[...trades]
-                  .filter(t => (!tradeFilterSymbol || t.symbol===tradeFilterSymbol) && (!tradeFilterType || (t.type||"buy")===tradeFilterType))
+                  .filter(t => { const inPeriod = filterByPeriod([t], period, yearFilter).length > 0; return inPeriod && (!tradeFilterSymbol || t.symbol===tradeFilterSymbol) && (!tradeFilterType || (t.type||"buy")===tradeFilterType); })
                   .sort((a,b) => {
                     const dir = tradeSortDir==="asc" ? 1 : -1;
                     return a.date.localeCompare(b.date) * dir;
