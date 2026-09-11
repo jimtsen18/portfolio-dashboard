@@ -751,6 +751,7 @@ export default function App() {
   const [posSort,    setPosSort]    = useState({ col:"valueInTWD", dir:"desc" });
   const [editingTrade,    setEditingTrade]    = useState(null); // trade object or null
   const [tradeFilterSymbol, setTradeFilterSymbol] = useState("");
+  const [tradeFilterType,   setTradeFilterType]   = useState("");
   const [tradeSortCol,      setTradeSortCol]      = useState("date");
   const [tradeSortDir,      setTradeSortDir]      = useState("desc");
   const [editingPosition, setEditingPosition] = useState(null); // position object or null
@@ -1671,23 +1672,27 @@ export default function App() {
               <button onClick={() => setTradeFilterSymbol("")}
                 style={{ background:"none", border:"none", color:"#38bdf8", cursor:"pointer", fontSize:13, padding:"0 4px" }}>×</button>
             )}
+            <button onClick={() => setTradeSortDir(d => d==="asc"?"desc":"asc")}
+              style={{ background:"#1a1f2e", border:"1px solid #2a3045", borderRadius:8,
+                color:"#38bdf8", padding:"6px 14px", fontSize:12, fontWeight:600,
+                cursor:"pointer", whiteSpace:"nowrap" }}>
+              📅 時間 {tradeSortDir==="desc"?"↓":"↑"}
+            </button>
             <div style={{ display:"flex", background:"#1a1f2e", border:"1px solid #2a3045", borderRadius:8, overflow:"hidden" }}>
-              {[{col:"date",label:"📅 時間"},{col:"symbol",label:"🔤 標的"}].map(({col,label}) => {
-                const active = tradeSortCol===col;
+              {[{val:"",label:"全部"},{val:"buy",label:"買入"},{val:"sell",label:"賣出"}].map(({val,label}) => {
+                const active = (tradeFilterType||"")===val;
                 return (
-                  <button key={col} onClick={() => {
-                    if (tradeSortCol===col) setTradeSortDir(d => d==="asc"?"desc":"asc");
-                    else { setTradeSortCol(col); setTradeSortDir("desc"); }
-                  }} style={{ background:active?"#1e3a5f":"transparent", border:"none",
-                    color:active?"#38bdf8":"#6b7a99", padding:"6px 14px", fontSize:12,
-                    fontWeight:600, cursor:"pointer", whiteSpace:"nowrap" }}>
-                    {label} {active ? (tradeSortDir==="desc"?"↓":"↑") : ""}
+                  <button key={val} onClick={() => setTradeFilterType(val)}
+                    style={{ background:active?"#1e3a5f":"transparent", border:"none",
+                      color:active?"#38bdf8":"#6b7a99", padding:"6px 14px", fontSize:12,
+                      fontWeight:600, cursor:"pointer", whiteSpace:"nowrap" }}>
+                    {label}
                   </button>
                 );
               })}
             </div>
             <span style={{ color:"#4a5568", fontSize:11 }}>
-              共 {trades.filter(t => !tradeFilterSymbol || t.symbol===tradeFilterSymbol).length} 筆
+              共 {trades.filter(t => (!tradeFilterSymbol || t.symbol===tradeFilterSymbol) && (!tradeFilterType || (t.type||"buy")===tradeFilterType)).length} 筆
             </span>
           </div>
 
@@ -1704,10 +1709,9 @@ export default function App() {
               </thead>
               <tbody>
                 {[...trades]
-                  .filter(t => !tradeFilterSymbol || t.symbol===tradeFilterSymbol)
+                  .filter(t => (!tradeFilterSymbol || t.symbol===tradeFilterSymbol) && (!tradeFilterType || (t.type||"buy")===tradeFilterType))
                   .sort((a,b) => {
                     const dir = tradeSortDir==="asc" ? 1 : -1;
-                    if (tradeSortCol==="symbol") return a.symbol.localeCompare(b.symbol) * dir;
                     return a.date.localeCompare(b.date) * dir;
                   })
                   .map((t, i) => {
