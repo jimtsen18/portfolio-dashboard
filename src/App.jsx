@@ -1087,7 +1087,7 @@ export default function App() {
       return s.date >= cutoff;
     });
     // 用最新一筆有台股/美股分開資料的快照來估算舊資料的比例
-    const latest = [...filtered].reverse().find(s => s.twMarketValue != null);
+    console.log("snapshots sample:", filtered.slice(-2)); const latest = [...filtered].reverse().find(s => s.twMarketValue != null); console.log("latest with tw:", latest);
     const twRatio = latest && latest.marketValue > 0 ? latest.twMarketValue / latest.marketValue : null;
     const twCostRatio = latest && latest.totalCost > 0 ? latest.twCost / latest.totalCost : null;
     return filtered.map(s => ({
