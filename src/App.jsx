@@ -1075,16 +1075,29 @@ export default function App() {
   })();
 
   // ── Filtered snapshot data for market value chart ───────────────────────────
-  const filteredSnapshots = snapshots.filter(s => {
-    if (yearFilter) {
-      return s.date >= yearFilter + "-01-01" && s.date <= yearFilter + "-12-31";
-    }
-    if (period.label === "ALL") return true;
-    const cutoff = period.label === "YTD"
-      ? new Date(new Date().getFullYear(), 0, 1).toISOString().slice(0, 10)
-      : daysAgo(period.days).toISOString().slice(0, 10);
-    return s.date >= cutoff;
-  });
+  const filteredSnapshots = useMemo(() => {
+    const filtered = snapshots.filter(s => {
+      if (yearFilter) {
+        return s.date >= yearFilter + "-01-01" && s.date <= yearFilter + "-12-31";
+      }
+      if (period.label === "ALL") return true;
+      const cutoff = period.label === "YTD"
+        ? new Date(new Date().getFullYear(), 0, 1).toISOString().slice(0, 10)
+        : daysAgo(period.days).toISOString().slice(0, 10);
+      return s.date >= cutoff;
+    });
+    // 用最新一筆有台股/美股分開資料的快照來估算舊資料的比例
+    const latest = [...filtered].reverse().find(s => s.twMarketValue != null);
+    const twRatio = latest && latest.marketValue > 0 ? latest.twMarketValue / latest.marketValue : null;
+    const twCostRatio = latest && latest.totalCost > 0 ? latest.twCost / latest.totalCost : null;
+    return filtered.map(s => ({
+      ...s,
+      twMarketValue: s.twMarketValue ?? (twRatio != null ? Math.round(s.marketValue * twRatio) : undefined),
+      twCost:        s.twCost        ?? (twCostRatio != null ? Math.round(s.totalCost * twCostRatio) : undefined),
+      usMarketValue: s.usMarketValue ?? (twRatio != null ? Math.round(s.marketValue * (1 - twRatio)) : undefined),
+      usCost:        s.usCost        ?? (twCostRatio != null ? Math.round(s.totalCost * (1 - twCostRatio)) : undefined),
+    }));
+  }, [snapshots, period, yearFilter]);
 
   // ── Render guards ─────────────────────────────────────────────────────────
   if (authLoading) return <LoadingScreen status="正在確認登入狀態…" />;
