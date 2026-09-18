@@ -737,6 +737,7 @@ export default function App() {
   // ── Firebase-backed state ────────────────────────────────────────────────
   const [trades,    setTrades]    = useState([]);
   const [snapshots, setSnapshots] = useState([]);
+  const [chartView, setChartView] = useState("total"); // total | tw | us
   const [dividends, setDividends] = useState([]);
   const [prices,    setPrices]    = useState(SEED_PRICES);
   const [lastSynced, setLastSynced] = useState(null);
@@ -1307,10 +1308,20 @@ export default function App() {
         <div className="chart-grid">
           {/* Line chart: market value vs cost over time */}
           <div style={{ background:"#1a1f2e", border:"1px solid #2a3045", borderRadius:12, padding:20, gridColumn:"1 / -1" }}>
-            <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:12 }}>
-              <div style={{ color:"#8892a8", fontSize:12 }}>總市值 vs 持倉成本走勢（{activePeriodLabel}，TWD）</div>
+            <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:12, flexWrap:"wrap", gap:8 }}>
+              <div style={{ color:"#8892a8", fontSize:12 }}>市值 vs 持倉成本走勢（{activePeriodLabel}，TWD）</div>
+              <div style={{ display:"flex", background:"#0f1422", border:"1px solid #2a3045", borderRadius:8, overflow:"hidden" }}>
+                {[{val:"total",label:"總計"},{val:"tw",label:"🇹🇼 台股"},{val:"us",label:"🇺🇸 美股"}].map(({val,label}) => (
+                  <button key={val} onClick={() => setChartView(val)}
+                    style={{ background:chartView===val?"#1e3a5f":"transparent", border:"none",
+                      color:chartView===val?"#38bdf8":"#6b7a99", padding:"5px 12px",
+                      fontSize:11, fontWeight:600, cursor:"pointer", whiteSpace:"nowrap" }}>
+                    {label}
+                  </button>
+                ))}
+              </div>
               {filteredSnapshots.length === 0 && (
-                <span style={{ color:"#4a5568", fontSize:11 }}>尚無歷史快照・每次同步報價時自動記錄一筆</span>
+                <span style={{ color:"#4a5568", fontSize:11 }}>尚無歷史快照</span>
               )}
             </div>
             {filteredSnapshots.length >= 2 ? (
@@ -1327,12 +1338,24 @@ export default function App() {
                     labelFormatter={l => "日期：" + l}
                   />
                   <Legend formatter={v => <span style={{ color:"#8892a8", fontSize:12 }}>{v}</span>} />
-                  <Line type="monotone" dataKey="marketValue" name="總市值"
-                    stroke="#38bdf8" strokeWidth={2} dot={filteredSnapshots.length <= 30}
-                    activeDot={{ r:5 }} />
-                  <Line type="monotone" dataKey="totalCost" name="持倉成本"
-                    stroke="#a78bfa" strokeWidth={2} strokeDasharray="5 5"
-                    dot={false} activeDot={{ r:4 }} />
+                  {chartView === "total" && <>
+                    <Line type="monotone" dataKey="marketValue" name="總市值"
+                      stroke="#38bdf8" strokeWidth={2} dot={filteredSnapshots.length <= 30} activeDot={{ r:5 }} />
+                    <Line type="monotone" dataKey="totalCost" name="持倉成本"
+                      stroke="#a78bfa" strokeWidth={2} strokeDasharray="5 5" dot={false} activeDot={{ r:4 }} />
+                  </>}
+                  {chartView === "tw" && <>
+                    <Line type="monotone" dataKey="twMarketValue" name="台股市值"
+                      stroke="#38bdf8" strokeWidth={2} dot={filteredSnapshots.length <= 30} activeDot={{ r:5 }} />
+                    <Line type="monotone" dataKey="twCost" name="台股持倉成本"
+                      stroke="#a78bfa" strokeWidth={2} strokeDasharray="5 5" dot={false} activeDot={{ r:4 }} />
+                  </>}
+                  {chartView === "us" && <>
+                    <Line type="monotone" dataKey="usMarketValue" name="美股市值(TWD)"
+                      stroke="#34d399" strokeWidth={2} dot={filteredSnapshots.length <= 30} activeDot={{ r:5 }} />
+                    <Line type="monotone" dataKey="usCost" name="美股持倉成本(TWD)"
+                      stroke="#f472b6" strokeWidth={2} strokeDasharray="5 5" dot={false} activeDot={{ r:4 }} />
+                  </>}
                 </LineChart>
               </ResponsiveContainer>
             ) : filteredSnapshots.length === 1 ? (

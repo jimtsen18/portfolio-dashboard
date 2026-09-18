@@ -84,11 +84,19 @@ export default async function handler(req, res) {
         });
 
         let totalMarketValue = 0, totalCost = 0;
+        let twMarketValue = 0, twCost = 0, usMarketValue = 0, usCost = 0;
         Object.values(map).forEach(pos => {
           if (pos.shares <= 0) return;
           const price = prices[pos.symbol] || 0;
           if (price === 0) return;
           const mv = pos.shares * price;
+          if (pos.market === "TW") {
+            twMarketValue += mv;
+            twCost += pos.totalBuyCost;
+          } else {
+            usMarketValue += mv * usdTwd;
+            usCost += pos.totalBuyCost * usdTwd;
+          }
           totalMarketValue += pos.market === "US" ? mv * usdTwd : mv;
           totalCost += pos.market === "US" ? pos.totalBuyCost * usdTwd : pos.totalBuyCost;
         });
@@ -99,6 +107,10 @@ export default async function handler(req, res) {
             date: today,
             marketValue: Math.round(totalMarketValue),
             totalCost: Math.round(totalCost),
+            twMarketValue: Math.round(twMarketValue),
+            twCost: Math.round(twCost),
+            usMarketValue: Math.round(usMarketValue),
+            usCost: Math.round(usCost),
           });
           results.push({ uid, date: today, marketValue: Math.round(totalMarketValue) });
         }
