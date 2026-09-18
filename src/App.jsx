@@ -1098,6 +1098,8 @@ export default function App() {
       usCost:        (s.usCost != null)        ? s.usCost        : (twCostRatio != null ? Math.round(s.totalCost * (1 - twCostRatio)) : null),
     }));
   }, [snapshots, period, yearFilter]);
+  // debug
+  if (filteredSnapshots.length > 0) console.log("first snap:", filteredSnapshots[0], "last snap:", filteredSnapshots[filteredSnapshots.length-1]);
 
   // ── Render guards ─────────────────────────────────────────────────────────
   if (authLoading) return <LoadingScreen status="正在確認登入狀態…" />;
