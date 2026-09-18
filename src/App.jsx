@@ -1087,15 +1087,15 @@ export default function App() {
       return s.date >= cutoff;
     });
     // 用最新一筆有台股/美股分開資料的快照來估算舊資料的比例
-    console.log("snapshots sample:", filtered.slice(-2)); const latest = [...filtered].reverse().find(s => s.twMarketValue != null); console.log("latest with tw:", latest);
+    const latest = [...snapshots].reverse().find(s => s.twMarketValue != null && s.twMarketValue > 0);
     const twRatio = latest && latest.marketValue > 0 ? latest.twMarketValue / latest.marketValue : null;
     const twCostRatio = latest && latest.totalCost > 0 ? latest.twCost / latest.totalCost : null;
     return filtered.map(s => ({
       ...s,
-      twMarketValue: s.twMarketValue ?? (twRatio != null ? Math.round(s.marketValue * twRatio) : undefined),
-      twCost:        s.twCost        ?? (twCostRatio != null ? Math.round(s.totalCost * twCostRatio) : undefined),
-      usMarketValue: s.usMarketValue ?? (twRatio != null ? Math.round(s.marketValue * (1 - twRatio)) : undefined),
-      usCost:        s.usCost        ?? (twCostRatio != null ? Math.round(s.totalCost * (1 - twCostRatio)) : undefined),
+      twMarketValue: (s.twMarketValue != null) ? s.twMarketValue : (twRatio != null ? Math.round(s.marketValue * twRatio) : null),
+      twCost:        (s.twCost != null)        ? s.twCost        : (twCostRatio != null ? Math.round(s.totalCost * twCostRatio) : null),
+      usMarketValue: (s.usMarketValue != null) ? s.usMarketValue : (twRatio != null ? Math.round(s.marketValue * (1 - twRatio)) : null),
+      usCost:        (s.usCost != null)        ? s.usCost        : (twCostRatio != null ? Math.round(s.totalCost * (1 - twCostRatio)) : null),
     }));
   }, [snapshots, period, yearFilter]);
 
