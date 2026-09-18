@@ -927,17 +927,21 @@ export default function App() {
       const today = new Date().toISOString().slice(0, 10);
       batch.set(userDoc(user.uid, COL_META, "sync_info"), { lastSynced: now });
       // Save daily market value snapshot
-      const snapTotalTWD = Math.round(
-        positions.reduce((s, p) => s + p.valueInTWD, 0)
-      );
-      const snapTotalCost = Math.round(
-        positions.reduce((s, p) => s + (p.market === "US" ? p.totalBuyCost * usdTwd : p.totalBuyCost), 0)
-      );
+      const snapTotalTWD = Math.round(positions.reduce((s, p) => s + p.valueInTWD, 0));
+      const snapTotalCost = Math.round(positions.reduce((s, p) => s + (p.market === "US" ? p.totalBuyCost * usdTwd : p.totalBuyCost), 0));
+      const snapTwValue = Math.round(positions.filter(p=>p.market==="TW").reduce((s,p)=>s+p.marketValue,0));
+      const snapTwCost  = Math.round(positions.filter(p=>p.market==="TW").reduce((s,p)=>s+p.totalBuyCost,0));
+      const snapUsValue = Math.round(positions.filter(p=>p.market==="US").reduce((s,p)=>s+p.marketValue*usdTwd,0));
+      const snapUsCost  = Math.round(positions.filter(p=>p.market==="US").reduce((s,p)=>s+p.totalBuyCost*usdTwd,0));
       if (snapTotalTWD > 0) {
         batch.set(userDoc(user.uid, COL_SNAPSHOTS, today), {
           date: today,
           marketValue: snapTotalTWD,
           totalCost: snapTotalCost,
+          twMarketValue: snapTwValue,
+          twCost: snapTwCost,
+          usMarketValue: snapUsValue,
+          usCost: snapUsCost,
         });
       }
       await batch.commit();
