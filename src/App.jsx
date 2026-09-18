@@ -825,6 +825,8 @@ export default function App() {
         const data = snap.docs
           .map(d => d.data())
           .sort((a, b) => a.date.localeCompare(b.date));
+        const last = data[data.length-1];
+        console.log("raw snapshot last:", last, "twMarketValue:", last?.twMarketValue);
         setSnapshots(data);
       });
 
