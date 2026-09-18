@@ -1372,9 +1372,9 @@ export default function App() {
                   </>}
                   {chartView === "tw" && <>
                     <Line type="monotone" dataKey="twMarketValue" name="台股市值"
-                      stroke="#38bdf8" strokeWidth={2} dot={filteredSnapshots.length <= 30} activeDot={{ r:5 }} />
+                      stroke="#f59e0b" strokeWidth={2} dot={filteredSnapshots.length <= 30} activeDot={{ r:5 }} />
                     <Line type="monotone" dataKey="twCost" name="台股持倉成本"
-                      stroke="#a78bfa" strokeWidth={2} strokeDasharray="5 5" dot={false} activeDot={{ r:4 }} />
+                      stroke="#e11d48" strokeWidth={2} strokeDasharray="5 5" dot={false} activeDot={{ r:4 }} />
                   </>}
                   {chartView === "us" && <>
                     <Line type="monotone" dataKey="usMarketValueUSD" name="美股市值(USD)"
@@ -1394,8 +1394,10 @@ export default function App() {
               </div>
             )}
             {filteredSnapshots.length >= 2 && (() => {
-              const first = filteredSnapshots[0].marketValue;
-              const last  = filteredSnapshots[filteredSnapshots.length-1].marketValue;
+              const key = chartView==="tw" ? "twMarketValue" : chartView==="us" ? "usMarketValueUSD" : "marketValue";
+              const isUSD = chartView==="us";
+              const first = filteredSnapshots[0][key] || 0;
+              const last  = filteredSnapshots[filteredSnapshots.length-1][key] || 0;
               const diff  = last - first;
               const pct   = first > 0 ? (diff / first * 100).toFixed(2) : 0;
               const color = diff >= 0 ? "#34d399" : "#f87171";
@@ -1403,7 +1405,7 @@ export default function App() {
                 <div style={{ marginTop:10, display:"flex", justifyContent:"flex-end", alignItems:"center", gap:16 }}>
                   <span style={{ color:"#6b7a99", fontSize:11 }}>{filteredSnapshots[0].date} → {filteredSnapshots[filteredSnapshots.length-1].date}</span>
                   <span style={{ color, fontWeight:700, fontSize:13 }}>
-                    {diff >= 0 ? "+" : ""}NT${fmt(Math.round(diff))}
+                    {diff >= 0 ? "+" : ""}{isUSD ? "$" : "NT$"}{fmt(Math.round(diff))}
                   </span>
                   <span style={{ color, fontSize:12 }}>
                     ({diff >= 0 ? "+" : ""}{pct}%)
