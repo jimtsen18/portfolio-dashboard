@@ -826,7 +826,6 @@ export default function App() {
           .map(d => d.data())
           .sort((a, b) => a.date.localeCompare(b.date));
         const last = data[data.length-1];
-        console.log("raw snapshot last FULL:", JSON.stringify(last));
         setSnapshots(data);
       });
 
