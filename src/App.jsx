@@ -1405,7 +1405,7 @@ export default function App() {
                 <div style={{ marginTop:10, display:"flex", justifyContent:"flex-end", alignItems:"center", gap:16 }}>
                   <span style={{ color:"#6b7a99", fontSize:11 }}>{filteredSnapshots[0].date} → {filteredSnapshots[filteredSnapshots.length-1].date}</span>
                   <span style={{ color, fontWeight:700, fontSize:13 }}>
-                    {diff >= 0 ? "+" : ""}{isUSD ? "$" : "NT$"}{fmt(Math.round(diff))}
+                    {diff >= 0 ? "+" : ""}{isUSD ? "USD$" : "NT$"}{fmt(Math.round(diff))}
                   </span>
                   <span style={{ color, fontSize:12 }}>
                     ({diff >= 0 ? "+" : ""}{pct}%)
