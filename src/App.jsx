@@ -928,10 +928,12 @@ export default function App() {
       // Save daily market value snapshot
       const snapTotalTWD = Math.round(positions.reduce((s, p) => s + p.valueInTWD, 0));
       const snapTotalCost = Math.round(positions.reduce((s, p) => s + (p.market === "US" ? p.totalBuyCost * usdTwd : p.totalBuyCost), 0));
-      const snapTwValue = Math.round(positions.filter(p=>p.market==="TW").reduce((s,p)=>s+p.marketValue,0));
-      const snapTwCost  = Math.round(positions.filter(p=>p.market==="TW").reduce((s,p)=>s+p.totalBuyCost,0));
-      const snapUsValue = Math.round(positions.filter(p=>p.market==="US").reduce((s,p)=>s+p.marketValue*usdTwd,0));
-      const snapUsCost  = Math.round(positions.filter(p=>p.market==="US").reduce((s,p)=>s+p.totalBuyCost*usdTwd,0));
+      const snapTwValue    = Math.round(positions.filter(p=>p.market==="TW").reduce((s,p)=>s+p.marketValue,0));
+      const snapTwCost     = Math.round(positions.filter(p=>p.market==="TW").reduce((s,p)=>s+p.totalBuyCost,0));
+      const snapUsValue    = Math.round(positions.filter(p=>p.market==="US").reduce((s,p)=>s+p.marketValue*usdTwd,0));
+      const snapUsCost     = Math.round(positions.filter(p=>p.market==="US").reduce((s,p)=>s+p.totalBuyCost*usdTwd,0));
+      const snapUsValueUSD = Math.round(positions.filter(p=>p.market==="US").reduce((s,p)=>s+p.marketValue,0)*100)/100;
+      const snapUsCostUSD  = Math.round(positions.filter(p=>p.market==="US").reduce((s,p)=>s+p.totalBuyCost,0)*100)/100;
       if (snapTotalTWD > 0) {
         batch.set(userDoc(user.uid, COL_SNAPSHOTS, today), {
           date: today,
@@ -941,6 +943,8 @@ export default function App() {
           twCost: snapTwCost,
           usMarketValue: snapUsValue,
           usCost: snapUsCost,
+          usMarketValueUSD: snapUsValueUSD,
+          usCostUSD: snapUsCostUSD,
         });
       }
       await batch.commit();
@@ -1351,10 +1355,10 @@ export default function App() {
                   <XAxis dataKey="date" tick={{ fill:"#6b7a99", fontSize:10 }}
                     tickFormatter={v => v.slice(5)} />
                   <YAxis tick={{ fill:"#6b7a99", fontSize:10 }}
-                    tickFormatter={v => "NT$" + (v >= 1000000 ? (v/1000000).toFixed(1)+"M" : (v/1000).toFixed(0)+"K")} />
+                    tickFormatter={v => chartView==="us" ? ("$" + (v >= 1000000 ? (v/1000000).toFixed(1)+"M" : (v/1000).toFixed(0)+"K")) : ("NT$" + (v >= 1000000 ? (v/1000000).toFixed(1)+"M" : (v/1000).toFixed(0)+"K"))} />
                   <Tooltip
                     contentStyle={{ background:"#e2e8f0", border:"1px solid #94a3b8", borderRadius:8, color:"#1a202c" }}
-                    formatter={(v, name) => ["NT$" + new Intl.NumberFormat("zh-TW").format(v), name]}
+                    formatter={(v, name) => [chartView==="us" ? "$"+new Intl.NumberFormat("zh-TW").format(v) : "NT$"+new Intl.NumberFormat("zh-TW").format(v), name]}
                     labelFormatter={l => "日期：" + l}
                   />
                   <Legend formatter={v => <span style={{ color:"#8892a8", fontSize:12 }}>{v}</span>} />
@@ -1371,9 +1375,9 @@ export default function App() {
                       stroke="#a78bfa" strokeWidth={2} strokeDasharray="5 5" dot={false} activeDot={{ r:4 }} />
                   </>}
                   {chartView === "us" && <>
-                    <Line type="monotone" dataKey="usMarketValue" name="美股市值(TWD)"
+                    <Line type="monotone" dataKey="usMarketValueUSD" name="美股市值(USD)"
                       stroke="#34d399" strokeWidth={2} dot={filteredSnapshots.length <= 30} activeDot={{ r:5 }} />
-                    <Line type="monotone" dataKey="usCost" name="美股持倉成本(TWD)"
+                    <Line type="monotone" dataKey="usCostUSD" name="美股持倉成本(USD)"
                       stroke="#f472b6" strokeWidth={2} strokeDasharray="5 5" dot={false} activeDot={{ r:4 }} />
                   </>}
                 </LineChart>
