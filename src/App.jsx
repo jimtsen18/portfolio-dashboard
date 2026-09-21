@@ -116,6 +116,7 @@ const fetchPricesFromAPI = async (allSymbols) => {
 // ─── CALC HELPERS ─────────────────────────────────────────────────────────────
 const buildPositions = (trades) => {
   const map = {};
+  const fifoCostMap = {}; // tradeId -> FIFO cost of sold shares
   const sorted = [...trades].sort((a, b) => a.date.localeCompare(b.date));
   sorted.forEach(t => {
     const sym = t.symbol;
@@ -144,6 +145,7 @@ const buildPositions = (trades) => {
           remainToSell = 0;
         }
       }
+      fifoCostMap[t.id] = costOfSold;
       if (pos.shares > 0) pos.peakWac = Math.round((pos.totalBuyCost / pos.shares) * 1e6) / 1e6;
       pos.realizedGain += t.shares * t.price - (t.fee || 0) - costOfSold;
       pos.shares       -= t.shares;
@@ -152,6 +154,7 @@ const buildPositions = (trades) => {
       if (pos.totalBuyCost < 0) pos.totalBuyCost = 0;
     }
   });
+  buildPositions._fifoCostMap = fifoCostMap;
   return Object.values(map).map(p => ({
     ...p,
     wac: p.shares > 0 ? Math.round((p.totalBuyCost / p.shares) * 1e6) / 1e6 : (p.peakWac || 0),
@@ -979,6 +982,7 @@ export default function App() {
 
   // ── Position calculations ─────────────────────────────────────────────────
   const rawPositions = useMemo(() => buildPositions(trades), [trades]);
+  const fifoCostMap  = buildPositions._fifoCostMap || {};
 
   const positions = useMemo(() => rawPositions.map(pos => {
     const price      = prices[pos.symbol] || 0;
@@ -1810,10 +1814,11 @@ export default function App() {
                   const unrealizedRoi = t.type==="buy" && buyCost > 0
                     ? (t.shares * currentPrice - buyCost) / buyCost * 100
                     : null;
+                  const fifoCost = fifoCostMap[t.id] ?? (wac * t.shares);
                   const realized = t.type==="sell"
-                    ? toTWD(t.shares*t.price - (t.fee||0) - wac*t.shares, t.market, usdTwd)
+                    ? toTWD(t.shares*t.price - (t.fee||0) - fifoCost, t.market, usdTwd)
                     : null;
-                  const sellCostSingle = t.type==="sell" ? toTWD(wac * t.shares, t.market, usdTwd) : 0;
+                  const sellCostSingle = t.type==="sell" ? toTWD(fifoCost, t.market, usdTwd) : 0;
                   const realizedRoi = t.type==="sell" && sellCostSingle > 0 && realized!=null
                     ? realized / sellCostSingle * 100
                     : null;
