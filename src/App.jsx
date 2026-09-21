@@ -1410,7 +1410,7 @@ export default function App() {
               const pct   = first > 0 ? (diff / first * 100).toFixed(2) : 0;
               const color = diff >= 0 ? "#34d399" : "#f87171";
               return (
-                <div style={{ marginTop:10, display:"flex", justifyContent:"space-between", alignItems:"flex-end" }}>
+                <div style={{ marginTop:10, display:"flex", flexDirection: isMobile?"column":"row", justifyContent:"space-between", alignItems: isMobile?"flex-start":"flex-end", gap: isMobile?8:0 }}>
                   {/* 左側：最新市值與成本 */}
                   <div style={{ display:"flex", gap:20 }}>
                     {chartView === "tw" && <>
@@ -1437,8 +1437,8 @@ export default function App() {
                   </div>
                   {/* 右側：期間變化 */}
                   {filteredSnapshots.length >= 2 && (
-                    <div style={{ display:"flex", alignItems:"center", gap:12 }}>
-                      <span style={{ color:"#6b7a99", fontSize:11 }}>{filteredSnapshots[0].date} → {filteredSnapshots[filteredSnapshots.length-1].date}</span>
+                    <div style={{ display:"flex", alignItems:"center", gap:8, flexWrap:"wrap" }}>
+                      <span style={{ color:"#6b7a99", fontSize:11, whiteSpace:"nowrap" }}>{filteredSnapshots[0].date} → {filteredSnapshots[filteredSnapshots.length-1].date}</span>
                       <span style={{ color, fontWeight:700, fontSize:13 }}>
                         {diff >= 0 ? "+" : ""}{isUSD ? "USD$" : "NT$"}{fmt(Math.round(diff))}
                       </span>
