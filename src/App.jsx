@@ -1414,14 +1414,13 @@ export default function App() {
               );
             })()}
             {/* 最新市值與成本摘要 */}
-            {filteredSnapshots.length >= 1 && (() => {
-              const latest = filteredSnapshots[filteredSnapshots.length-1];
-              const twMV   = latest.twMarketValue || 0;
-              const twCost = latest.twCost || 0;
-              const usMV   = latest.usMarketValueUSD || 0;
-              const usCost = latest.usCostUSD || 0;
-              const totalMV   = latest.marketValue || 0;
-              const totalCost = latest.totalCost || 0;
+            {(() => {
+              const twMV   = positions.filter(p=>p.market==="TW").reduce((s,p)=>s+p.marketValue,0);
+              const twCost = positions.filter(p=>p.market==="TW").reduce((s,p)=>s+p.totalBuyCost,0);
+              const usMV   = positions.filter(p=>p.market==="US").reduce((s,p)=>s+p.marketValue,0);
+              const usCost = positions.filter(p=>p.market==="US").reduce((s,p)=>s+p.totalBuyCost,0);
+              const totalMV   = twMV + usMV * usdTwd;
+              const totalCost = twCost + usCost * usdTwd;
               return (
                 <div style={{ display:"flex", flexWrap:"wrap", gap:16, marginTop:12, paddingTop:12, borderTop:"1px solid #1e2535" }}>
                   {chartView === "total" && <>
