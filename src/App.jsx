@@ -1413,6 +1413,52 @@ export default function App() {
                 </div>
               );
             })()}
+            {/* 最新市值與成本摘要 */}
+            {filteredSnapshots.length >= 1 && (() => {
+              const latest = filteredSnapshots[filteredSnapshots.length-1];
+              const twMV   = latest.twMarketValue || 0;
+              const twCost = latest.twCost || 0;
+              const usMV   = latest.usMarketValueUSD || 0;
+              const usCost = latest.usCostUSD || 0;
+              const totalMV   = latest.marketValue || 0;
+              const totalCost = latest.totalCost || 0;
+              return (
+                <div style={{ display:"flex", flexWrap:"wrap", gap:16, marginTop:12, paddingTop:12, borderTop:"1px solid #1e2535" }}>
+                  {chartView === "total" && <>
+                    <div style={{ display:"flex", flexDirection:"column", gap:3 }}>
+                      <span style={{ color:"#6b7a99", fontSize:10 }}>最新總市值</span>
+                      <span style={{ color:"#38bdf8", fontWeight:700, fontSize:13 }}>NTD${fmt(totalMV)}</span>
+                      <span style={{ color:"#38bdf8", fontSize:11 }}>USD${fmt(Math.round((twMV/usdTwd + usMV)))}</span>
+                    </div>
+                    <div style={{ display:"flex", flexDirection:"column", gap:3 }}>
+                      <span style={{ color:"#6b7a99", fontSize:10 }}>最新持倉成本</span>
+                      <span style={{ color:"#a78bfa", fontWeight:700, fontSize:13 }}>NTD${fmt(totalCost)}</span>
+                      <span style={{ color:"#a78bfa", fontSize:11 }}>USD${fmt(Math.round((twCost/usdTwd + usCost)))}</span>
+                    </div>
+                  </>}
+                  {chartView === "tw" && <>
+                    <div style={{ display:"flex", flexDirection:"column", gap:3 }}>
+                      <span style={{ color:"#6b7a99", fontSize:10 }}>台股最新市值</span>
+                      <span style={{ color:"#f59e0b", fontWeight:700, fontSize:13 }}>NTD${fmt(twMV)}</span>
+                    </div>
+                    <div style={{ display:"flex", flexDirection:"column", gap:3 }}>
+                      <span style={{ color:"#6b7a99", fontSize:10 }}>台股持倉成本</span>
+                      <span style={{ color:"#e11d48", fontWeight:700, fontSize:13 }}>NTD${fmt(twCost)}</span>
+                    </div>
+                  </>}
+                  {chartView === "us" && <>
+                    <div style={{ display:"flex", flexDirection:"column", gap:3 }}>
+                      <span style={{ color:"#6b7a99", fontSize:10 }}>美股最新市值</span>
+                      <span style={{ color:"#34d399", fontWeight:700, fontSize:13 }}>USD${fmt(usMV)}</span>
+                    </div>
+                    <div style={{ display:"flex", flexDirection:"column", gap:3 }}>
+                      <span style={{ color:"#6b7a99", fontSize:10 }}>美股持倉成本</span>
+                      <span style={{ color:"#f472b6", fontWeight:700, fontSize:13 }}>USD${fmt(usCost)}</span>
+                    </div>
+                  </>}
+                </div>
+              );
+            })()}
           </div>
           {/* Donut: individual weights */}
           <div style={{ background:"#1a1f2e", border:"1px solid #2a3045", borderRadius:12, padding:20 }}>
