@@ -1656,15 +1656,20 @@ export default function App() {
                         const usCost   = usPos.reduce((s,p)=>s+toTWD(p.totalBuyCost,p.market,usdTwd),0);
                         const usRoi    = usCost>0 ? (usPos.reduce((s,p)=>s+p.unrealized*usdTwd,0)/usCost*100) : 0;
                         return (
-                          <tr key={"sep-"+i}>
-                            <td colSpan={11} style={{ padding:"8px 14px", background:"#0d1424", borderTop:"1px solid #2a3045", borderBottom:"1px solid #2a3045" }}>
-                              <div style={{ display:"flex", alignItems:"center", gap:20, flexWrap:"wrap" }}>
-                                <span style={{ color:"#a78bfa", fontSize:11, fontWeight:700, letterSpacing:"0.1em" }}>🇺🇸 美股</span>
-                                <span style={{ color:"#6b7a99", fontSize:11 }}>未實現 <span style={{ color:usUnreal>=0?"#34d399":"#f87171", fontWeight:600 }}>NT${fmtSign(Math.round(usUnreal))}</span></span>
-                                <span style={{ color:"#6b7a99", fontSize:11 }}>已實現 <span style={{ color:usReal>=0?"#a78bfa":"#f87171", fontWeight:600 }}>NT${fmtSign(Math.round(usReal))}</span></span>
-                                <span style={{ color:"#6b7a99", fontSize:11 }}>ROI <span style={{ color:usRoi>=0?"#34d399":"#f87171", fontWeight:600 }}>{fmtPct(usRoi)}</span></span>
-                              </div>
+                          <tr key={"sep-"+i} style={{ background:"#0d1424", borderTop:"1px solid #2a3045", borderBottom:"1px solid #2a3045" }}>
+                            <td colSpan={7} style={{ padding:"8px 14px" }}>
+                              <span style={{ color:"#a78bfa", fontSize:11, fontWeight:700, letterSpacing:"0.1em" }}>🇺🇸 美股</span>
                             </td>
+                            <td style={{ padding:"8px 14px", textAlign:"right" }}>
+                              <span style={{ color:usUnreal>=0?"#34d399":"#f87171", fontWeight:600, fontSize:12 }}>NT${fmtSign(Math.round(usUnreal))}</span>
+                            </td>
+                            <td style={{ padding:"8px 14px", textAlign:"right" }}>
+                              <span style={{ color:usReal>=0?"#a78bfa":"#f87171", fontWeight:600, fontSize:12 }}>NT${fmtSign(Math.round(usReal))}</span>
+                            </td>
+                            <td style={{ padding:"8px 14px", textAlign:"right" }}>
+                              <span style={{ color:usRoi>=0?"#34d399":"#f87171", fontWeight:600, fontSize:12 }}>{fmtPct(usRoi)}</span>
+                            </td>
+                            <td style={{ padding:"8px 14px" }} />
                           </tr>
                         );
                       })()}
@@ -1675,15 +1680,20 @@ export default function App() {
                         const twCost   = twPos.reduce((s,p)=>s+p.totalBuyCost,0);
                         const twRoi    = twCost>0 ? (twPos.reduce((s,p)=>s+p.unrealized,0)/twCost*100) : 0;
                         return (
-                          <tr key="sep-tw">
-                            <td colSpan={11} style={{ padding:"8px 14px", background:"#0d1424", borderBottom:"1px solid #2a3045" }}>
-                              <div style={{ display:"flex", alignItems:"center", gap:20, flexWrap:"wrap" }}>
-                                <span style={{ color:"#38bdf8", fontSize:11, fontWeight:700, letterSpacing:"0.1em" }}>🇹🇼 台股</span>
-                                <span style={{ color:"#6b7a99", fontSize:11 }}>未實現 <span style={{ color:twUnreal>=0?"#34d399":"#f87171", fontWeight:600 }}>NT${fmtSign(Math.round(twUnreal))}</span></span>
-                                <span style={{ color:"#6b7a99", fontSize:11 }}>已實現 <span style={{ color:twReal>=0?"#a78bfa":"#f87171", fontWeight:600 }}>NT${fmtSign(Math.round(twReal))}</span></span>
-                                <span style={{ color:"#6b7a99", fontSize:11 }}>ROI <span style={{ color:twRoi>=0?"#34d399":"#f87171", fontWeight:600 }}>{fmtPct(twRoi)}</span></span>
-                              </div>
+                          <tr key="sep-tw" style={{ background:"#0d1424", borderBottom:"1px solid #2a3045" }}>
+                            <td colSpan={7} style={{ padding:"8px 14px" }}>
+                              <span style={{ color:"#38bdf8", fontSize:11, fontWeight:700, letterSpacing:"0.1em" }}>🇹🇼 台股</span>
                             </td>
+                            <td style={{ padding:"8px 14px", textAlign:"right" }}>
+                              <span style={{ color:twUnreal>=0?"#34d399":"#f87171", fontWeight:600, fontSize:12 }}>NT${fmtSign(Math.round(twUnreal))}</span>
+                            </td>
+                            <td style={{ padding:"8px 14px", textAlign:"right" }}>
+                              <span style={{ color:twReal>=0?"#a78bfa":"#f87171", fontWeight:600, fontSize:12 }}>NT${fmtSign(Math.round(twReal))}</span>
+                            </td>
+                            <td style={{ padding:"8px 14px", textAlign:"right" }}>
+                              <span style={{ color:twRoi>=0?"#34d399":"#f87171", fontWeight:600, fontSize:12 }}>{fmtPct(twRoi)}</span>
+                            </td>
+                            <td style={{ padding:"8px 14px" }} />
                           </tr>
                         );
                       })()}
