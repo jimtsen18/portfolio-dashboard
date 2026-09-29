@@ -75,7 +75,13 @@ export default async function handler(req, res) {
           if (!map[t.symbol]) map[t.symbol] = { symbol: t.symbol, market: t.market, shares: 0, totalBuyCost: 0 };
           const pos = map[t.symbol];
           if (t.type === "buy" || !t.type) {
-            const cost = t.isAdjustment && t.totalCost != null ? t.totalCost : t.shares * t.price + (t.fee || 0);
+            // isAdjustment 的 totalCost 是台幣，美股需換回原幣美元
+            let cost;
+            if (t.isAdjustment && t.totalCost != null) {
+              cost = t.market === "US" ? t.totalCost / usdTwd : t.totalCost;
+            } else {
+              cost = t.shares * t.price + (t.fee || 0);
+            }
             pos.shares += t.shares;
             pos.totalBuyCost += cost;
           } else if (t.type === "sell") {
