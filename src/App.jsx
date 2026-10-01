@@ -1641,7 +1641,7 @@ export default function App() {
                     <th onClick={() => handleSort("price")}       style={{ ...thHover("price"),       textAlign:"right" }}>現價 <Arrow col="price" /></th>
                     <th onClick={() => handleSort("valueInTWD")}  style={{ ...thHover("valueInTWD"),  textAlign:"right" }}>市值 <Arrow col="valueInTWD" /></th>
                     <th onClick={() => handleSort("unrealTWD")}   style={{ ...thHover("unrealTWD"),   textAlign:"right" }}>未實現損益 <Arrow col="unrealTWD" /></th>
-                    <th onClick={() => handleSort("realTWD")}     style={{ ...thHover("realTWD"),     textAlign:"right" }}>已實現利得 <Arrow col="realTWD" /></th>
+                    <th onClick={() => handleSort("realTWD")}     style={{ ...thHover("realTWD"),     textAlign:"right" }}>已實現損益 <Arrow col="realTWD" /></th>
                     <th onClick={() => handleSort("roi")}         style={{ ...thHover("roi"),         textAlign:"right" }}>ROI <Arrow col="roi" /></th>
                     <th style={{ ...thBase, textAlign:"center" }}>操作</th>
                   </tr>
@@ -1652,7 +1652,7 @@ export default function App() {
                       {showSep(sortedPositions, i) && (() => {
                         const usPos = sortedPositions.filter(p=>p.market==="US");
                         const usUnreal = usPos.reduce((s,p)=>s+p.unrealTWD,0);
-                        const usReal   = usPos.reduce((s,p)=>s+p.realTWD,0);
+                        const usReal   = usPos.reduce((s,p)=>s+p.realTWD,0) + filteredDivs.filter(d=>d.market==="US").reduce((s,d)=>s+toTWD(d.totalAmount??(d.amount*(d.shares||1)),d.market,usdTwd),0);
                         const usCost   = usPos.reduce((s,p)=>s+toTWD(p.totalBuyCost,p.market,usdTwd),0);
                         const usRoi    = usCost>0 ? (usPos.reduce((s,p)=>s+p.unrealized*usdTwd,0)/usCost*100) : 0;
                         return (
@@ -1676,7 +1676,7 @@ export default function App() {
                       {posSort.col==="category" && i===0 && (() => {
                         const twPos = sortedPositions.filter(p=>p.market==="TW");
                         const twUnreal = twPos.reduce((s,p)=>s+p.unrealTWD,0);
-                        const twReal   = twPos.reduce((s,p)=>s+p.realTWD,0);
+                        const twReal   = twPos.reduce((s,p)=>s+p.realTWD,0) + filteredDivs.filter(d=>d.market==="TW").reduce((s,d)=>s+toTWD(d.totalAmount??(d.amount*(d.shares||1)),d.market,usdTwd),0);
                         const twCost   = twPos.reduce((s,p)=>s+p.totalBuyCost,0);
                         const twRoi    = twCost>0 ? (twPos.reduce((s,p)=>s+p.unrealized,0)/twCost*100) : 0;
                         return (
@@ -1726,9 +1726,15 @@ export default function App() {
                             <span style={{ color:p.unrealized>=0?"#34d399":"#f87171", fontSize:11, fontVariantNumeric:"tabular-nums" }}>USD${fmtSign(Math.round(p.unrealTWD/usdTwd))}</span>
                           </div>
                         </td>
-                        <td style={{ padding:"11px 14px", textAlign:"right", color:p.realTWD>=0?"#a78bfa":"#f87171", fontWeight:600 }}>
-                          {p.realTWD!==0 ? "NT$"+fmtSign(p.realTWD) : <span style={{ color:"#2a3045" }}>—</span>}
-                        </td>
+                        {(() => {
+                          const symDiv = filteredDivs.filter(d=>d.symbol===p.symbol).reduce((s,d)=>s+toTWD(d.totalAmount??(d.amount*(d.shares||1)),d.market,usdTwd),0);
+                          const realAndDiv = (p.realTWD||0) + symDiv;
+                          return (
+                            <td style={{ padding:"11px 14px", textAlign:"right", color:realAndDiv>=0?"#a78bfa":"#f87171", fontWeight:600 }}>
+                              {realAndDiv!==0 ? "NT$"+fmtSign(Math.round(realAndDiv)) : <span style={{ color:"#2a3045" }}>—</span>}
+                            </td>
+                          );
+                        })()}
                         <td style={{ padding:"11px 14px", textAlign:"right" }}>
                           <span style={{ color:p.roi>=0?"#34d399":"#f87171", fontWeight:700,
                             background:p.roi>=0?"#34d39915":"#f8717115", padding:"2px 8px", borderRadius:6 }}>
