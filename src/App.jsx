@@ -1099,24 +1099,33 @@ export default function App() {
         : daysAgo(period.days).toISOString().slice(0, 10);
       return s.date >= cutoff;
     });
-    // 用最新有 USD 欄位的快照算比例（僅用於補舊快照缺漏欄位）
+    // 用最新有 USD 欄位的快照算比例（用於補舊快照缺漏欄位）
     const latest = [...snapshots].reverse().find(s => s.usMarketValueUSD != null && s.usMarketValueUSD > 0);
-    // TWD 比例：用 TWD 欄位對 TWD 總值，不涉及匯率換算
-    const twRatio      = latest && latest.marketValue > 0 ? latest.twMarketValue / latest.marketValue : null;
-    const twCostRatio  = latest && latest.totalCost > 0   ? latest.twCost / latest.totalCost : null;
-    // USD 比例：用 USD 市值對 USD 市值（同幣別），避免跨匯率推算
-    const usUSDRatio      = latest && latest.usMarketValue > 0 ? latest.usMarketValueUSD / latest.usMarketValue : null;
-    const usUSDCostRatio  = latest && latest.usCost > 0        ? latest.usCostUSD / latest.usCost : null;
-    return filtered.map(s => ({
-      ...s,
-      twMarketValue:    (s.twMarketValue != null)    ? s.twMarketValue    : (twRatio != null         ? Math.round(s.marketValue * twRatio) : null),
-      twCost:           (s.twCost != null)           ? s.twCost           : (twCostRatio != null      ? Math.round(s.totalCost * twCostRatio) : null),
-      usMarketValue:    (s.usMarketValue != null)    ? s.usMarketValue    : (twRatio != null          ? Math.round(s.marketValue * (1 - twRatio)) : null),
-      usCost:           (s.usCost != null)           ? s.usCost           : (twCostRatio != null      ? Math.round(s.totalCost * (1 - twCostRatio)) : null),
-      // USD 欄位：優先用真實值，缺漏時用同幣別 TWD 欄位 ÷ 當日比例，避免跨匯率失真
-      usMarketValueUSD: (s.usMarketValueUSD != null) ? s.usMarketValueUSD : (usUSDRatio != null && s.usMarketValue != null ? Math.round(s.usMarketValue * usUSDRatio) : null),
-      usCostUSD:        (s.usCostUSD != null)        ? s.usCostUSD        : (usUSDCostRatio != null && s.usCost != null    ? Math.round(s.usCost * usUSDCostRatio)        : null),
-    }));
+    const twRatio        = latest && latest.marketValue > 0    ? latest.twMarketValue / latest.marketValue : null;
+    const twCostRatio    = latest && latest.totalCost > 0      ? latest.twCost / latest.totalCost : null;
+    // 優先用同幣別比例；舊快照沒有 usMarketValue/usCost 時 fallback 用 totalCost 比例
+    const usUSDMvRatio   = latest && latest.usMarketValue > 0  ? latest.usMarketValueUSD / latest.usMarketValue : null;
+    const usUSDCostRatio = latest && latest.usCost > 0         ? latest.usCostUSD / latest.usCost : null;
+    const usUSDMvFallback   = latest && latest.marketValue > 0 ? latest.usMarketValueUSD / latest.marketValue : null;
+    const usUSDCostFallback = latest && latest.totalCost > 0   ? latest.usCostUSD / latest.totalCost : null;
+    return filtered.map(s => {
+      const usMarketValue = (s.usMarketValue != null) ? s.usMarketValue : (twRatio != null ? Math.round(s.marketValue * (1 - twRatio)) : null);
+      const usCost        = (s.usCost != null)        ? s.usCost        : (twCostRatio != null ? Math.round(s.totalCost * (1 - twCostRatio)) : null);
+      return {
+        ...s,
+        twMarketValue:    (s.twMarketValue != null) ? s.twMarketValue : (twRatio != null      ? Math.round(s.marketValue * twRatio)       : null),
+        twCost:           (s.twCost != null)        ? s.twCost        : (twCostRatio != null   ? Math.round(s.totalCost * twCostRatio)     : null),
+        usMarketValue,
+        usCost,
+        // USD 欄位：有真實值 → 真實值；有 TWD 同幣別欄位 → 同幣別比例換算；否則 → totalCost 比例 fallback
+        usMarketValueUSD: (s.usMarketValueUSD != null) ? s.usMarketValueUSD
+          : usMarketValue != null && usUSDMvRatio != null   ? Math.round(usMarketValue * usUSDMvRatio)
+          : usUSDMvFallback != null                         ? Math.round(s.marketValue * usUSDMvFallback) : null,
+        usCostUSD:        (s.usCostUSD != null)        ? s.usCostUSD
+          : usCost != null && usUSDCostRatio != null        ? Math.round(usCost * usUSDCostRatio)
+          : usUSDCostFallback != null                       ? Math.round(s.totalCost * usUSDCostFallback) : null,
+      };
+    });
   }, [snapshots, period, yearFilter]);
 
 
