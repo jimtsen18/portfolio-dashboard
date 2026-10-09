@@ -69,13 +69,12 @@ export default async function handler(req, res) {
           ...usSymbols.map(async sym => { const p = await fetchUSPrice(sym); if (p) prices[sym] = p; }),
         ]);
 
-        // 計算持倉
+        // 計算持倉（FIFO，與前端邏輯一致）
         const map = {};
-        [...trades].sort((a, b) => a.date.localeCompare(b.date)).forEach(t => {
-          if (!map[t.symbol]) map[t.symbol] = { symbol: t.symbol, market: t.market, shares: 0, totalBuyCost: 0 };
+        [...trades].sort((a, b) => a.date.localeCompare(b.date) || (a.createdAt||"").localeCompare(b.createdAt||"")).forEach(t => {
+          if (!map[t.symbol]) map[t.symbol] = { symbol: t.symbol, market: t.market, shares: 0, totalBuyCost: 0, lots: [] };
           const pos = map[t.symbol];
           if (t.type === "buy" || !t.type) {
-            // isAdjustment 的 totalCost 是台幣，美股需換回原幣美元
             let cost;
             if (t.isAdjustment && t.totalCost != null) {
               cost = t.market === "US" ? t.totalCost / usdTwd : t.totalCost;
@@ -84,8 +83,23 @@ export default async function handler(req, res) {
             }
             pos.shares += t.shares;
             pos.totalBuyCost += cost;
+            pos.lots.push({ shares: t.shares, price: cost / t.shares });
           } else if (t.type === "sell") {
+            let remaining = t.shares;
+            while (remaining > 0 && pos.lots.length > 0) {
+              const lot = pos.lots[0];
+              if (lot.shares <= remaining) {
+                remaining -= lot.shares;
+                pos.totalBuyCost -= lot.shares * lot.price;
+                pos.lots.shift();
+              } else {
+                pos.totalBuyCost -= remaining * lot.price;
+                lot.shares -= remaining;
+                remaining = 0;
+              }
+            }
             pos.shares -= t.shares;
+            if (pos.totalBuyCost < 0) pos.totalBuyCost = 0;
           }
         });
 
