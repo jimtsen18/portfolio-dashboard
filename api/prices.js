@@ -11,20 +11,23 @@ async function fetchUSPrice(symbol) {
   return data.c;
 }
 
-// Fetch TW stock price from TWSE API
+// Fetch TW stock price from TWSE API（上市 TSE，失敗時 fallback 上櫃 OTC）
 async function fetchTWPrice(symbol) {
-  // TWSE uses format like 2330 for stocks, 0056 for ETFs
-  const url = `https://mis.twse.com.tw/stock/api/getStockInfo.jsp?ex_ch=tse_${symbol}.tw&json=1&delay=0`;
-  const res = await fetch(url, {
-    headers: { "User-Agent": "Mozilla/5.0" }
-  });
-  if (!res.ok) throw new Error(`TWSE error ${res.status} for ${symbol}`);
-  const data = await res.json();
-  const info = data?.msgArray?.[0];
-  if (!info) return null;
-  // z = current price, y = yesterday close (fallback)
-  const price = parseFloat(info.z !== "-" ? info.z : info.y);
-  return isNaN(price) ? null : price;
+  const headers = { "User-Agent": "Mozilla/5.0" };
+  const tryFetch = async (ex) => {
+    try {
+      const url = `https://mis.twse.com.tw/stock/api/getStockInfo.jsp?ex_ch=${ex}_${symbol}.tw&json=1&delay=0`;
+      const res = await fetch(url, { headers });
+      if (!res.ok) return null;
+      const data = await res.json();
+      const info = data?.msgArray?.[0];
+      if (!info) return null;
+      const price = parseFloat(info.z !== "-" ? info.z : info.y);
+      return isNaN(price) ? null : price;
+    } catch { return null; }
+  };
+  // 先試上市（tse），抓不到再試上櫃（otc）
+  return (await tryFetch("tse")) ?? (await tryFetch("otc"));
 }
 
 export default async function handler(req, res) {

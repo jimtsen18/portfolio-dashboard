@@ -17,15 +17,19 @@ async function fetchUSPrice(symbol) {
 }
 
 async function fetchTWPrice(symbol) {
-  try {
-    const res = await fetch(`https://mis.twse.com.tw/stock/api/getStockInfo.jsp?ex_ch=tse_${symbol}.tw&json=1&delay=0`,
-      { headers: { "User-Agent": "Mozilla/5.0" } });
-    const data = await res.json();
-    const info = data?.msgArray?.[0];
-    if (!info) return null;
-    const price = parseFloat(info.z !== "-" ? info.z : info.y);
-    return isNaN(price) ? null : price;
-  } catch { return null; }
+  const headers = { "User-Agent": "Mozilla/5.0" };
+  const tryFetch = async (ex) => {
+    try {
+      const res = await fetch(`https://mis.twse.com.tw/stock/api/getStockInfo.jsp?ex_ch=${ex}_${symbol}.tw&json=1&delay=0`, { headers });
+      const data = await res.json();
+      const info = data?.msgArray?.[0];
+      if (!info) return null;
+      const price = parseFloat(info.z !== "-" ? info.z : info.y);
+      return isNaN(price) ? null : price;
+    } catch { return null; }
+  };
+  // 先試上市（tse），抓不到再試上櫃（otc）
+  return (await tryFetch("tse")) ?? (await tryFetch("otc"));
 }
 
 async function fetchFxRate() {
