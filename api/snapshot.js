@@ -107,10 +107,9 @@ export default async function handler(req, res) {
         let twMarketValue = 0, twCost = 0, usMarketValue = 0, usCost = 0;
         let usMarketValueUSD = 0, usCostUSD = 0;
         Object.values(map).forEach(pos => {
-          if (pos.shares <= 0) return;
+          if (pos.shares <= 0) return; // 已清倉，成本為 0，跳過
           const price = prices[pos.symbol] || 0;
-          if (price === 0) return;
-          const mv = pos.shares * price;
+          const mv = pos.shares * price; // 報價抓不到時 mv=0，但成本仍需計入
           if (pos.market === "TW") {
             twMarketValue += mv;
             twCost += pos.totalBuyCost;
