@@ -759,6 +759,7 @@ export default function App() {
   const [tradeSortCol,      setTradeSortCol]      = useState("date");
   const [tradeSortDir,      setTradeSortDir]      = useState("desc");
   const [editingPosition, setEditingPosition] = useState(null); // position object or null
+  const [divSymFilter, setDivSymFilter] = useState("");
   const [syncStatus, setSyncStatus] = useState("idle");
   const [syncMsg,    setSyncMsg]    = useState("");
   const [usdTwd,     setUsdTwd]     = useState(USD_TWD_FALLBACK);
@@ -2047,6 +2048,24 @@ export default function App() {
             </div>
           </div>
 
+          {/* 標的篩選 */}
+          <div style={{ display:"flex", alignItems:"center", gap:10, marginBottom:8 }}>
+            <span style={{ color:"#6b7a99", fontSize:12, whiteSpace:"nowrap" }}>篩選標的</span>
+            <select value={divSymFilter} onChange={e => setDivSymFilter(e.target.value)}
+              style={{ background:"#1a1f2e", border:"1px solid #2a3045", borderRadius:7,
+                color:"#e2e8f0", padding:"5px 10px", fontSize:13, cursor:"pointer" }}>
+              <option value="">全部</option>
+              {[...new Set(dividends.map(d => d.symbol))].sort().map(sym => (
+                <option key={sym} value={sym}>{sym}</option>
+              ))}
+            </select>
+            {divSymFilter && (
+              <button onClick={() => setDivSymFilter("")}
+                style={{ background:"transparent", border:"none", color:"#6b7a99",
+                  cursor:"pointer", fontSize:12, padding:"4px 6px" }}>✕ 清除</button>
+            )}
+          </div>
+
           <div style={{ background:"#1a1f2e", border:"1px solid #2a3045", borderRadius:12, overflow:"auto" }}>
             <table style={{ width:"100%", borderCollapse:"collapse", fontSize:13 }}>
               <thead>
@@ -2059,7 +2078,7 @@ export default function App() {
                 </tr>
               </thead>
               <tbody>
-                {[...dividends].sort((a,b) => b.date.localeCompare(a.date)).map((d, i) => (
+                {[...dividends].filter(d => !divSymFilter || d.symbol === divSymFilter).sort((a,b) => b.date.localeCompare(a.date)).map((d, i) => (
                   <tr key={d.id} style={{ borderTop:"1px solid #1e2535", background:i%2===0?"transparent":"#0f1422" }}>
                     <td style={{ padding:"10px 14px", color:"#8892a8", whiteSpace:"nowrap" }}>{d.date}</td>
                     <td style={{ padding:"10px 14px", fontWeight:700, color:"#e2e8f0" }}>{d.symbol}</td>
