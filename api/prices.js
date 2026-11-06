@@ -22,7 +22,12 @@ async function fetchTWPrice(symbol) {
       const data = await res.json();
       const info = data?.msgArray?.[0];
       if (!info) return null;
-      const price = parseFloat(info.z !== "-" ? info.z : info.y);
+      // z = 當前成交價, o = 開盤價, y = 昨收價
+      // 盤中 z 可能還是 "-"（尚無新成交），優先用 z，其次 o（今日開盤），最後 y（昨收）
+      const z = parseFloat(info.z); // NaN if "-"
+      const o = parseFloat(info.o); // NaN if "-"
+      const y = parseFloat(info.y);
+      const price = !isNaN(z) && z > 0 ? z : !isNaN(o) && o > 0 ? o : y;
       return isNaN(price) ? null : price;
     } catch { return null; }
   };

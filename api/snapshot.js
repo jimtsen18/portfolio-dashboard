@@ -24,7 +24,10 @@ async function fetchTWPrice(symbol) {
       const data = await res.json();
       const info = data?.msgArray?.[0];
       if (!info) return null;
-      const price = parseFloat(info.z !== "-" ? info.z : info.y);
+      const z = parseFloat(info.z);
+      const o = parseFloat(info.o);
+      const y = parseFloat(info.y);
+      const price = !isNaN(z) && z > 0 ? z : !isNaN(o) && o > 0 ? o : y;
       return isNaN(price) ? null : price;
     } catch { return null; }
   };
