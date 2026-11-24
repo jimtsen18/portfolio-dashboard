@@ -67,6 +67,8 @@ const PALETTE = [
 ];
 
 const PERIOD_OPTIONS = [
+  { label: "1D",  days: 1    },
+  { label: "5D",  days: 5    },
   { label: "1M",  days: 30   },
   { label: "6M",  days: 183  },
   { label: "YTD", days: null },
@@ -749,7 +751,7 @@ export default function App() {
   const seededRef = useRef(false);
 
   // ── UI state ─────────────────────────────────────────────────────────────
-  const [period,     setPeriod]     = useState(PERIOD_OPTIONS[2]);
+  const [period,     setPeriod]     = useState(PERIOD_OPTIONS[4]);
   const [yearFilter, setYearFilter] = useState(null);
   const [tab,        setTab]        = useState("overview");
   const [posSort,    setPosSort]    = useState({ col:"valueInTWD", dir:"desc" });
